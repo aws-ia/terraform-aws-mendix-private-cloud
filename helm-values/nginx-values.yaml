@@ -1,0 +1,12 @@
+controller:
+    service:
+      type: LoadBalancer
+      externalTrafficPolicy: "Cluster"
+      annotations:
+        # AWS Load Balancer Controller Annotations
+        service.beta.kubernetes.io/aws-load-balancer-type: external
+        service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+        service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+
+        # External DNS Annotations
+        external-dns.alpha.kubernetes.io/hostname: ${hostname}

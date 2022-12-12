@@ -1,0 +1,13 @@
+promtail:
+  enabled: true
+  config:
+    logLevel: info
+    serverPort: 3101
+    clients:
+      - url: http://loki-stack.loki.svc.cluster.local:3100/loki/api/v1/push
+
+compactor:
+  retention_enabled: true
+
+limits_config:
+  retention_period: 30d

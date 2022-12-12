@@ -1,0 +1,27 @@
+clusterID: ""
+clusterSecret: ""
+mendix_operator_version: ""
+AWSRegion: ""
+registry:
+      pullUrl: ""
+      pushUrl: ""
+      repositoryName: ""
+      iamRole: ""
+storageplan:
+    file:
+        name: ""
+        endPoint: ""
+        accessKey: ""
+        secretKey: ""
+    database:
+        name: ""
+        host: ""
+        port: ""
+        databaseName: ""
+        password: ""
+        username: ""
+ingress:
+    className: ""
+    domainName: ""
+certificate_expiration_email: ""
+appName: "{{.Name}}"
