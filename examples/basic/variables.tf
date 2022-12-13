@@ -1,11 +1,6 @@
 variable "aws_region" {
   type        = string
   description = "AWS region name"
-
-  validation {
-    condition     = can(regex("[a-z][a-z]-[a-z]+-[1-9]", var.aws_region))
-    error_message = "Must be valid AWS Region name"
-  }
 }
 
 variable "domain_name" {
@@ -16,11 +11,6 @@ variable "domain_name" {
 variable "s3_bucket_name" {
   type        = string
   description = "S3 bucket name"
-
-  validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{3,64}[a-z0-9]$", var.s3_bucket_name))
-    error_message = "Incorrect S3 bucket naming rules https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html"
-  }
 }
 
 variable "cluster_id" {
