@@ -43,7 +43,7 @@ resource "aws_ebs_encryption_by_default" "ebs_encryption" {
 }
 
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.12.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.18.1"
 
   node_security_group_additional_rules = {
     cluster_to_nginx_webhook = {
@@ -66,7 +66,7 @@ module "eks_blueprints" {
 
   # EKS CLUSTER
   cluster_name       = module.vpc.cluster_name
-  cluster_version    = "1.23"
+  cluster_version    = "1.24"
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.vpc_private_subnets
 
@@ -87,7 +87,7 @@ module "eks_blueprints" {
 }
 
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.12.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.18.1"
 
   eks_cluster_id       = module.eks_blueprints.eks_cluster_id
   eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint

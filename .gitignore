@@ -14,3 +14,4 @@ terraform.rc
 .terraform.lock.hcl
 build/
 .DS_Store
+.idea

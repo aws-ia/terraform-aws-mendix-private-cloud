@@ -8,18 +8,19 @@ resource "aws_kms_key" "cmk_shared_bucket" {
 #S3 versioning and logging disabled for cost reduction
 #tfsec:ignore:*
 resource "aws_s3_bucket" "apps_shared_bucket" {
-  bucket = var.s3_bucket_name
+  bucket        = var.s3_bucket_name
+  force_destroy = true
+}
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.cmk_shared_bucket.arn
-        sse_algorithm     = "aws:kms"
-      }
+resource "aws_s3_bucket_server_side_encryption_configuration" "apps_shared_bucket" {
+  bucket = aws_s3_bucket.apps_shared_bucket.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.cmk_shared_bucket.arn
+      sse_algorithm     = "aws:kms"
     }
   }
-
-  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "apps_shared_bucket" {
