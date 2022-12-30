@@ -8,7 +8,15 @@ This repository represents an IaC project (Infractructure as Code) which facilit
 
 ## Prerequisites
 
-### Terraform remote backend configuration:
+### Mendix Private Cloud
+* Create your application on https://privatecloud.mendixcloud.com
+* Mendix Runtime Version >= 9.21
+* Register a new EKS Cluster
+* Add a new Connected Namespace called **mendix**
+* Retrieve the cluster id and the cluster secret in the *Installation* tab
+* Enable the External Secrets Store in the *Customization* tab.
+
+### Terraform
 Provision a S3 bucket with your desired name and a DynamoDB table with the partition key `LockID` (String type), to store the state file and have a locking mechanism respectively.
 
 * Install [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
@@ -16,27 +24,28 @@ Provision a S3 bucket with your desired name and a DynamoDB table with the parti
 * Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 * Configure AWS CLI with the `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` corresponding to the IAM user which has the aforementioned IAM permissions (execute `aws configure`)
 * Install [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
-* Install [`kubectl`](https://kubernetes.io/docs/tasks/tools/)
+* Install [kubectl](https://kubernetes.io/docs/tasks/tools/)
 * Install wget (required for Terraform eks module)
-* Edit the `versions.tf` as the following example:
+* Edit the `providers.tf` as the following example:
 ```
 terraform {
   backend "s3" {
     region         = "eu-central-1"
-    bucket         = "project-name-state"
+    bucket         = "state-bucket-state"
     key            = "terraform.tfstate"
-    dynamodb_table = "project-name-state"
+    dynamodb_table = "dynamodb-table-state"
     encrypt        = true
   }
 ```
-* Fill the terraform.tfvars file :
+* Edit the `terraform.tfvars` as the following example: :
 ```
-aws_region                   = "eu-central-1"
+aws_region                   = ""
 domain_name                  = "project-name-example.com"
 certificate_expiration_email = "example@example.com"
 s3_bucket_name               = "project-name"
 cluster_id                   = ""
 cluster_secret               = ""
+environments_internal_names  = ["app1", "app2", "app3"]
 ```
 ## Provisionning
 
@@ -46,7 +55,7 @@ To provision a new Mendix for Private Cloud environment, aka Mx4PC, execute the 
 terraform init
 terraform apply
 ```
-Once everything has be successfully provisioned, run the following command to retrieve the access credentials for your new cluster and automatically configure kubectl:
+Once everything has been successfully provisioned, run the following command to retrieve the access credentials for your new cluster and automatically configure kubectl:
 
 ```
 aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
@@ -57,15 +66,14 @@ Retrieve the aws\_route53\_zone\_name\_servers generated using the AWS Console i
 ```
 terraform output aws_route53_zone_name_server
 ```
-Depending of your provider, update your external Domain Name Registrar or Route53 registered domain with those values following this documentation [Route53 Documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
-
+Depending on your provider, update your external Domain Name Registrar or Route53 registered domain with those values following this documentation [Route53 Documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
 ## Security
 ### Cluster endpoint
 Kubernetes API requests within your cluster's VPC (such as node to control plane communication) use the private VPC endpoint.
 Your cluster API server is accessible from the internet. You can, optionally, limit the CIDR blocks that can access the public endpoint as mentionned in the [Amazon EKS Documentation](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html) by setting up the `allowed_ips` variable.
 
 ### Encryption
-All the EBS volumes, the RDS PostgreSQL database and the S3 storage bucket are encrypted at rest. The end-to-end TLS encryption is handled at the Ingress NGINX Controller level, a certificate is generated for each app by cert-manager, configured with an Let’s Encrypt certificate issuer. When a new environment is created, certificate validation may take up to 15 minutes.
+All the EBS volumes, the RDS PostgreSQL database and the S3 storage bucket are encrypted at rest. The end-to-end TLS encryption is handled at the Ingress NGINX Controller level, a certificate is generated for each app by cert-manager, configured with a Let’s Encrypt certificate issuer.
 
 ## Automatic scaling
 All the Amazon EKS nodes are placed in an Auto Scaling group, but it doesn’t install
@@ -92,6 +100,10 @@ brew install kreuzwerker/taps/m1-terraform-provider-helper
 m1-terraform-provider-helper activate
 m1-terraform-provider-helper install hashicorp/template -v v2.2.0
 ```
+* Windows users:
+```
+terraform providers lock -platform=linux_amd64 -platform=darwin_amd64
+```
 * Mendix Agent/Operator not connected or misconfigured.
 
 Retrieve the logs of the installer job :
@@ -112,7 +124,7 @@ operatorconfiguration.privatecloud.mendix.com/mendix-operator-configuration patc
 ```
 * Reinstall the installer :
 ```
-terraform destroy -target=helm_release.mendix-installer
+terraform destroy -target=helm_release.mendix_installer
 terraform plan; terraform apply --auto-approve
 ```
 ## Cleanup
@@ -123,9 +135,11 @@ terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingres
 terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]" -auto-approve
 terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]" -auto-approve
 terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]" -auto-approve
+terraform destroy -target="module.monitoring.helm_release.loki" -auto-approve
+terraform destroy -target="module.monitoring.kubernetes_namespace.loki" -auto-approve
 terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approve
 terraform destroy -target="module.eks_blueprints" -auto-approve
-terraform destroy -target="module.vpc.module.vpc" -auto-approve
+terraform destroy -target="module.vpc" -auto-approve
 terraform destroy -auto-approve
 ```
 
@@ -169,7 +183,11 @@ terraform destroy -auto-approve
 | Name | Type |
 |------|------|
 | [aws_ebs_encryption_by_default.ebs_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ebs_encryption_by_default) | resource |
+| [aws_iam_role.app_irsa_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.app_irsa_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_route53_zone.cluster_dns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
+| [aws_secretsmanager_secret.apps_secrets](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret_version.apps_secrets_version](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [helm_release.mendix_installer](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace.mendix](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
@@ -186,7 +204,9 @@ terraform destroy -auto-approve
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name | `string` | n/a | yes |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | S3 bucket name | `string` | n/a | yes |
 | <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
-| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator Version | `string` | `"2.9.0"` | no |
+| <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
+| <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1",<br>  "app2",<br>  "app3"<br>]</pre> | no |
+| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator Version | `string` | `"2.10.0"` | no |
 
 ## Outputs
 
@@ -205,9 +225,8 @@ terraform destroy -auto-approve
 | <a name="output_database_port"></a> [database\_port](#output\_database\_port) | RDS database port |
 | <a name="output_database_server_address"></a> [database\_server\_address](#output\_database\_server\_address) | RDS database address |
 | <a name="output_database_username"></a> [database\_username](#output\_database\_username) | RDS database username |
-| <a name="output_filestorage_access_key"></a> [filestorage\_access\_key](#output\_filestorage\_access\_key) | S3 access key |
 | <a name="output_filestorage_endpoint"></a> [filestorage\_endpoint](#output\_filestorage\_endpoint) | S3 endpoint |
-| <a name="output_filestorage_secret_key"></a> [filestorage\_secret\_key](#output\_filestorage\_secret\_key) | S3 secret key |
+| <a name="output_filestorage_regional_endpoint"></a> [filestorage\_regional\_endpoint](#output\_filestorage\_regional\_endpoint) | S3 regional endpoint |
 | <a name="output_grafana_admin_password"></a> [grafana\_admin\_password](#output\_grafana\_admin\_password) | Grafana admin password |
 | <a name="output_region"></a> [region](#output\_region) | AWS region where the cluster is provisioned |
 | <a name="output_vpc_private_subnets"></a> [vpc\_private\_subnets](#output\_vpc\_private\_subnets) | VPC private subnets |

@@ -75,15 +75,9 @@ output "filestorage_endpoint" {
   value       = module.file_storage.filestorage_endpoint
 }
 
-output "filestorage_access_key" {
-  description = "S3 access key"
-  value       = module.file_storage.filestorage_access_key
-}
-
-output "filestorage_secret_key" {
-  description = "S3 secret key"
-  sensitive   = true
-  value       = module.file_storage.filestorage_secret_key
+output "filestorage_regional_endpoint" {
+  description = "S3 regional endpoint"
+  value       = module.file_storage.filestorage_regional_endpoint
 }
 
 # VPC output

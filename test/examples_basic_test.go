@@ -30,7 +30,7 @@ func TestExamplesBasicTest(t *testing.T) {
 			"s3_bucket_name":               uniqueId + "-s3-bucket",
 			"cluster_id":                   uniqueId + "-7824-4e08-97fd-9b5d1792a027",
 			"cluster_secret":               uniqueId + "UdfdTK7P0FD5",
-			"mendix_operator_version":      "2.9.0",
+			"mendix_operator_version":      "2.10.0",
 		},
 		BackendConfig: map[string]interface{}{
 			"backend": "local",
@@ -43,6 +43,8 @@ func TestExamplesBasicTest(t *testing.T) {
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]",
+		"module.mendix_private_cloud_example.module.monitoring.helm_release.loki",
+		"module.mendix_private_cloud_example.module.monitoring.kubernetes_namespace.loki",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons",
 		"module.mendix_private_cloud_example.module.eks_blueprints",
 		"module.mendix_private_cloud_example.module.vpc",
@@ -62,7 +64,7 @@ func TestExamplesBasicTest(t *testing.T) {
 						"s3_bucket_name":               uniqueId + "-s3-bucket",
 						"cluster_id":                   uniqueId + "-7824-4e08-97fd-9b5d1792a027",
 						"cluster_secret":               uniqueId + "UdfdTK7P0FD5",
-						"mendix_operator_version":      "2.9.0",
+						"mendix_operator_version":      "2.10.0",
 					},
 					BackendConfig: map[string]interface{}{
 						"backend": "local",

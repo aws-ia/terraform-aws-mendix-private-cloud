@@ -14,21 +14,17 @@ resource "aws_secretsmanager_secret_version" "grafana" {
   secret_string = random_password.grafana.result
 }
 
-data "template_file" "kubernetes" {
-  template = file("${path.module}/dashboards/kubernetes.json.tpl")
-}
-
-data "template_file" "mendix_native" {
-  template = file("${path.module}/dashboards/mendix_native.json.tpl")
+resource "kubernetes_namespace" "loki" {
+  metadata {
+    name = "loki"
+  }
 }
 
 resource "helm_release" "loki" {
-  name             = "loki-stack"
-  repository       = "https://grafana.github.io/helm-charts"
-  chart            = "loki-stack"
-  namespace        = "loki"
-  version          = "2.8.4"
-  create_namespace = true
+  name       = "loki-stack"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "loki-stack"
+  namespace  = "loki"
   values = [
     templatefile("${path.module}/helm-values/loki-stack-values.yaml", {})
   ]
@@ -36,9 +32,8 @@ resource "helm_release" "loki" {
 
 resource "helm_release" "grafana" {
   name             = "grafana"
-  chart            = "grafana"
   repository       = "https://grafana.github.io/helm-charts"
-  version          = "6.32.1"
+  chart            = "grafana"
   namespace        = "grafana"
   create_namespace = true
   description      = "Grafana Helm Chart deployment configuration"
@@ -46,8 +41,10 @@ resource "helm_release" "grafana" {
     templatefile(
       "${path.module}/helm-values/grafana-values.yaml.tpl",
       {
-        kubernetes     = "${indent(8, data.template_file.kubernetes.rendered)}}",
-        mendix_native  = "${indent(8, data.template_file.mendix_native.rendered)}}",
+        mendix_native  = "${indent(8, templatefile("${path.module}/dashboards/mendix_native.json.tpl", {}))}",
+        pvc_disk_space = "${indent(8, templatefile("${path.module}/dashboards/pvc_disk_space.json.tpl", {}))}",
+        kubernetes     = "${indent(8, templatefile("${path.module}/dashboards/kubernetes.json.tpl", {}))}",
+        rds            = "${indent(8, templatefile("${path.module}/dashboards/rds.json.tpl", {}))}",
         hostname       = var.domain_name
         role_arn       = aws_iam_role.grafana_irsa_role.arn
         admin_password = aws_secretsmanager_secret_version.grafana.secret_string

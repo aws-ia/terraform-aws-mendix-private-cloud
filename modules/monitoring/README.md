@@ -7,16 +7,14 @@
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.35 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.7.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.4.3 |
-| <a name="requirement_template"></a> [template](#requirement\_template) | 2.2.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.46.0 |
-| <a name="provider_helm"></a> [helm](#provider\_helm) | 2.7.1 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.4.3 |
-| <a name="provider_template"></a> [template](#provider\_template) | 2.2.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.35 |
+| <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.7.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.4.3 |
 
 ## Modules
 
@@ -33,8 +31,6 @@ No modules.
 | [helm_release.grafana](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.loki](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [random_password.grafana](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
-| [template_file.kubernetes](https://registry.terraform.io/providers/hashicorp/template/2.2.0/docs/data-sources/file) | data source |
-| [template_file.mendix_native](https://registry.terraform.io/providers/hashicorp/template/2.2.0/docs/data-sources/file) | data source |
 
 ## Inputs
 

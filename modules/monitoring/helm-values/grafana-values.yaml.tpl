@@ -3,6 +3,10 @@ grafana.ini:
     domain: monitoring.${hostname}
     root_url: "%(protocol)s://%(domain)s/grafana"
     serve_from_sub_path: true
+persistence:
+  type: pvc
+  enabled: true
+  size: 1Gi
 serviceAccount:
   create: true
   name: grafana
@@ -58,10 +62,16 @@ dashboardProviders:
        path: /var/lib/grafana/dashboards/default
 dashboards:
   default:
-    kubernetes:
-      json: |
-        ${kubernetes}
     mendix_native:
       json: |
         ${mendix_native}
+    pvc_disk_space:
+      json: |
+        ${pvc_disk_space}
+    kubernetes:
+      json: |
+        ${kubernetes}
+    rds:
+      json: |
+        ${rds}
 

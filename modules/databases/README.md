@@ -11,8 +11,8 @@
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.46.0 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.4.3 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.35 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.4.3 |
 
 ## Modules
 
@@ -32,8 +32,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_primary_security_group_id"></a> [cluster\_primary\_security\_group\_id](#input\_cluster\_primary\_security\_group\_id) | VPC primary security group ID | `string` | n/a | yes |
 | <a name="input_identifier"></a> [identifier](#input\_identifier) | VPC identifierD | `string` | n/a | yes |
-| <a name="input_rds_instance_class"></a> [rds\_instance\_class](#input\_rds\_instance\_class) | RDS Instance class | `string` | `"db.t3.micro"` | no |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | VPC subnets | `list(string)` | n/a | yes |
+| <a name="input_rds_instance_class"></a> [rds\_instance\_class](#input\_rds\_instance\_class) | RDS Instance class | `string` | `"db.t3.micro"` | no |
 
 ## Outputs
 

@@ -3,7 +3,6 @@
 *.tfstate*
 _tfplan
 *.terraform.lock.hcl
-*.tfvars
 override.tf
 override.tf.json
 *_override.tf
@@ -15,3 +14,4 @@ terraform.rc
 build/
 .DS_Store
 .idea
+temp.json

@@ -8,7 +8,7 @@ certificate_expiration_email=""
 s3_bucket_name=""
 cluster_id=""
 cluster_secret=""
-mendix_operator_version="2.9.0"
+mendix_operator_version="2.10.0"
 
 terraform init
 
@@ -21,6 +21,8 @@ terraform destroy -target="module.mendix_private_cloud_example.module.eks_bluepr
 terraform destroy -target="module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]" -auto-approve
 terraform destroy -target="module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]" -auto-approve
 terraform destroy -target="module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]" -auto-approve
+terraform destroy -target="module.mendix_private_cloud_example.module.monitoring.helm_release.loki" -auto-approve
+terraform destroy -target="module.mendix_private_cloud_example.module.monitoring.kubernetes_namespace.loki" -auto-approve
 terraform destroy -target="module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons" -auto-approve
 terraform destroy -target="module.mendix_private_cloud_example.module.eks_blueprints" -auto-approve
 terraform destroy -target="module.mendix_private_cloud_example.module.vpc" -auto-approve
@@ -57,14 +59,15 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region name | `string` | n/a | yes |
 | <a name="input_certificate_expiration_email"></a> [certificate\_expiration\_email](#input\_certificate\_expiration\_email) | Let's Encrypt certificate expiration email | `string` | n/a | yes |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | Mendix Private Cloud Cluster ID | `string` | n/a | yes |
 | <a name="input_cluster_secret"></a> [cluster\_secret](#input\_cluster\_secret) | Mendix Private Cloud Cluster Secret | `string` | n/a | yes |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name | `string` | n/a | yes |
-| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator Version | `string` | `"2.9.0"` | no |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | S3 bucket name | `string` | n/a | yes |
+| <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1",<br>  "app2",<br>  "app3"<br>]</pre> | no |
+| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator Version | `string` | `"2.10.0"` | no |
 
 ## Outputs
 

@@ -617,107 +617,6 @@
               }
             ]
           },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 18
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "pluginVersion": "8.1.6",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "exemplar": true,
-          "expr": "container_fs_usage_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}\r",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "used",
-          "queryType": "randomWalk",
-          "refId": "FS usage"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "exemplar": true,
-          "expr": "container_fs_limit_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "limit",
-          "refId": "FS limit"
-        }
-      ],
-      "title": "Temporary disk usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
           "unit": "binBps"
         },
         "overrides": []
@@ -1606,7 +1505,9 @@
   "refresh": false,
   "schemaVersion": 34,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "prometheus"
+  ],
   "templating": {
     "list": [
       {

@@ -8,13 +8,12 @@ output "filestorage_regional_endpoint" {
   value       = aws_s3_bucket.apps_shared_bucket.bucket_regional_domain_name
 }
 
-output "filestorage_access_key" {
-  description = "S3 access key"
-  value       = aws_iam_access_key.s3.id
+output "filestorage_shared_bucket_arn" {
+  description = "S3 shared bucket ARN"
+  value       = aws_s3_bucket.apps_shared_bucket.arn
 }
 
-output "filestorage_secret_key" {
-  description = "S3 secret key"
-  value       = aws_iam_access_key.s3.secret
-  sensitive   = true
+output "filestorage_kms_key_arn" {
+  description = "S3 KMS Key"
+  value       = aws_kms_key.cmk_shared_bucket.arn
 }

@@ -78,10 +78,10 @@ module "eks_blueprints" {
   managed_node_groups = {
     t3_medium = {
       node_group_name = "managed-ondemand"
-      instance_types  = ["t3.medium"]
-      subnet_ids      = module.vpc.vpc_public_subnets
-
-      disk_size = 50
+      instance_types  = [var.eks_node_instance_type]
+      subnet_ids      = module.vpc.vpc_private_subnets
+      public_ip       = false
+      disk_size       = 25
     }
   }
 }
@@ -103,14 +103,17 @@ module "eks_blueprints_kubernetes_addons" {
   # Add-ons
   enable_aws_load_balancer_controller = true
 
+  enable_secrets_store_csi_driver              = true
+  enable_secrets_store_csi_driver_provider_aws = true
+  csi_secrets_store_provider_aws_helm_config = {
+    values = [templatefile("${path.module}/helm-values/csi-secrets-store-provider-aws.yaml", {
+      hostname = var.domain_name
+    })]
+  }
+
   enable_external_dns = true
   external_dns_helm_config = {
-    name       = "external-dns"
-    chart      = "external-dns"
-    repository = "https://charts.bitnami.com/bitnami"
-    version    = "6.1.6"
-    namespace  = "external-dns"
-    values     = [templatefile("${path.module}/helm-values/external-dns-values.yaml", {})]
+    values = [templatefile("${path.module}/helm-values/external-dns-values.yaml", {})]
   }
 
   enable_ingress_nginx = true
@@ -131,6 +134,9 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
   enable_prometheus = true
+  prometheus_helm_config = {
+    values = [templatefile("${path.module}/helm-values/prometheus-values.yaml", {})]
+  }
 
   depends_on = [module.eks_blueprints, aws_route53_zone.cluster_dns]
 }
@@ -153,33 +159,130 @@ resource "kubernetes_namespace" "mendix" {
 }
 
 resource "helm_release" "mendix_installer" {
-  name  = "mendixinstaller"
-  chart = "./charts/mendix-installer"
+  name      = "mendixinstaller"
+  chart     = "./charts/mendix-installer"
+  namespace = "mendix"
   values = [
-    templatefile("${path.module}/helm-values/mendix-installer-values.yaml",
+    templatefile("${path.module}/helm-values/mendix-installer-values.yaml.tpl",
       {
-        cluster_id : var.cluster_id,
-        cluster_secret : var.cluster_secret,
-        mendix_operator_version : var.mendix_operator_version,
-        awsregion : module.vpc.region,
-        certificate_expiration_email : var.certificate_expiration_email
-        registry_pullurl : module.container_registry.container_registry_hostname,
-        registry_pushurl : module.container_registry.container_registry_hostname,
-        registry_repository : module.container_registry.container_registry_name,
-        registry_iam_role : module.container_registry.container_irsa_role_arn,
-        ingress_domainname : var.domain_name,
-        storageplan_file_name : "file",
-        storageplan_file_regional_endpoint : module.file_storage.filestorage_regional_endpoint,
-        storageplan_file_accesskey : module.file_storage.filestorage_access_key
-        storageplan_file_secretkey : module.file_storage.filestorage_secret_key,
-        storageplan_database_name : "database",
-        storageplan_database_host : module.databases.database_server_address,
-        storageplan_database_port : module.databases.database_port,
-        storageplan_database_dbname : module.databases.database_name,
-        storageplan_database_admin_username : module.databases.database_username,
-        storageplan_database_admin_password : module.databases.database_password
+        cluster_name                 = module.vpc.cluster_name,
+        account_id                   = data.aws_caller_identity.current.account_id,
+        cluster_id                   = var.cluster_id,
+        cluster_secret               = sensitive(var.cluster_secret),
+        mendix_operator_version      = var.mendix_operator_version,
+        aws_region                   = module.vpc.region,
+        certificate_expiration_email = var.certificate_expiration_email
+        registry_pullurl             = module.container_registry.container_registry_hostname,
+        registry_repository          = module.container_registry.container_registry_name,
+        registry_iam_role            = module.container_registry.container_irsa_role_arn,
+        ingress_domainname           = var.domain_name,
+        environments_internal_names  = var.environments_internal_names
+        secretsmanager_name          = aws_secretsmanager_secret.apps_secrets.name
     })
   ]
 
   depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
+}
+
+#tfsec:ignore:aws-ssm-secret-use-customer-key
+resource "aws_secretsmanager_secret" "apps_secrets" {
+  name_prefix             = "${module.vpc.cluster_name}-secrets"
+  recovery_window_in_days = 7
+}
+
+resource "aws_secretsmanager_secret_version" "apps_secrets_version" {
+  secret_id = aws_secretsmanager_secret.apps_secrets.id
+  secret_string = jsonencode({
+    storage-service-name = "com.mendix.storage.s3",
+    storage-endpoint     = module.file_storage.filestorage_regional_endpoint,
+    storage-bucket-name  = var.s3_bucket_name,
+    database-type        = "PostgreSQL",
+    database-jdbc-url    = "jdbc:postgresql://${module.databases.database_server_address}:5432/my-app-1?sslmode=prefer",
+    database-name        = "postgres",
+    database-username    = "mendix",
+    database-password    = module.databases.database_password,
+    database-host        = "${module.databases.database_server_address}:5432"
+  })
+}
+
+resource "aws_iam_role_policy" "app_irsa_policy" {
+  for_each = toset(var.environments_internal_names)
+
+  name = "${module.vpc.cluster_name}-app-policy"
+  role = aws_iam_role.app_irsa_role[each.key].id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "VisualEditor0",
+        "Effect" : "Allow",
+        "Action" : [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+
+        "Resource" : aws_secretsmanager_secret.apps_secrets.arn
+      },
+      {
+        "Action" : [
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListMultipartUploadParts",
+          "s3:PutObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          module.file_storage.filestorage_shared_bucket_arn
+        ]
+      },
+      {
+        "Action" : [
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListMultipartUploadParts",
+          "s3:PutObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${module.file_storage.filestorage_shared_bucket_arn}/*"
+        ]
+      },
+      {
+        "Action" : [
+          "kms:GenerateDataKey"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          module.file_storage.filestorage_kms_key_arn
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "app_irsa_role" {
+  for_each = toset(var.environments_internal_names)
+
+  name = "${module.vpc.cluster_name}-app-role-${each.key}"
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks_blueprints.oidc_provider}"
+        },
+        "Action" : "sts:AssumeRoleWithWebIdentity",
+        "Condition" : {
+          "StringEquals" : {
+            "${module.eks_blueprints.oidc_provider}:aud" : "sts.amazonaws.com",
+            "${module.eks_blueprints.oidc_provider}:sub" : "system:serviceaccount:mendix:${each.key}"
+          }
+        }
+      }
+    ]
+  })
 }
