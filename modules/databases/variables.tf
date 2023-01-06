@@ -18,3 +18,43 @@ variable "rds_instance_class" {
   default     = "db.t3.micro"
   type        = string
 }
+
+variable "file_storage_endpoint" {
+  description = "S3 regional endpoint"
+  type        = string
+}
+
+variable "secrets_manager_name" {
+  type        = string
+  description = "Secrets Manager name"
+}
+
+variable "cluster_name" {
+  type        = string
+  description = "Kubernetes Cluster Name"
+}
+
+variable "aws_caller_identity_account_id" {
+  type        = string
+  description = "AWS Caller Identity Account ID"
+}
+
+variable "oidc_provider" {
+  type        = string
+  description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"
+}
+
+variable "environment_internal_name" {
+  type        = string
+  description = "Environment internal name"
+}
+
+variable "filestorage_kms_key_arn" {
+  type        = string
+  description = "S3 KMS Key"
+}
+
+variable "filestorage_shared_bucket_arn" {
+  type        = string
+  description = "S3 shared bucket ARN"
+}

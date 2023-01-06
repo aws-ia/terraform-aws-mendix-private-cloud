@@ -14,6 +14,5 @@ environmentsInternalNames:
 %{ for name in environments_internal_names ~}
     - ${name}
 %{ endfor ~}
-secretsmanagerName: "${secretsmanager_name}"
 clusterName: "${cluster_name}"
 accountID: "${account_id}"

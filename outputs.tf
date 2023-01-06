@@ -40,33 +40,31 @@ output "container_irsa_role_arn" {
 # Database output
 output "database_server_address" {
   description = "RDS database address"
-  value       = module.databases.database_server_address
+  value = {
+    for key, value in module.databases : key => value.database_server_address
+  }
 }
 
 output "database_name" {
   description = "RDS database name"
-  value       = module.databases.database_name
-}
-
-output "database_port" {
-  description = "RDS database port"
-  value       = module.databases.database_port
+  value = {
+    for key, value in module.databases : key => value.database_name
+  }
 }
 
 output "database_username" {
   description = "RDS database username"
-  value       = module.databases.database_username
+  value = {
+    for key, value in module.databases : key => value.database_username
+  }
 }
 
 output "database_password" {
   description = "RDS database password"
   sensitive   = true
-  value       = module.databases.database_password
-}
-
-output "database_engine" {
-  description = "RDS database engine"
-  value       = module.databases.database_engine
+  value = {
+    for key, value in module.databases : key => value.database_password
+  }
 }
 
 # Filestorage ouput

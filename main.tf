@@ -13,16 +13,26 @@ resource "aws_route53_zone" "cluster_dns" {
   force_destroy = true
 }
 
-module "databases" {
-  source                            = "./modules/databases"
-  identifier                        = "${module.vpc.cluster_name}-database"
-  subnets                           = module.vpc.vpc_private_subnets
-  cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
-}
-
 module "file_storage" {
   source         = "./modules/file-storage"
   s3_bucket_name = var.s3_bucket_name
+}
+
+module "databases" {
+  for_each = toset(var.environments_internal_names)
+
+  source                            = "./modules/databases"
+  identifier                        = "${module.vpc.cluster_name}-database-${each.key}"
+  subnets                           = module.vpc.vpc_private_subnets
+  cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
+  file_storage_endpoint             = module.file_storage.filestorage_regional_endpoint
+  filestorage_shared_bucket_arn     = module.file_storage.filestorage_shared_bucket_arn
+  filestorage_kms_key_arn           = module.file_storage.filestorage_kms_key_arn
+  cluster_name                      = module.vpc.cluster_name
+  secrets_manager_name              = "${module.vpc.cluster_name}-${each.key}-secrets"
+  aws_caller_identity_account_id    = data.aws_caller_identity.current.account_id
+  oidc_provider                     = module.eks_blueprints.oidc_provider
+  environment_internal_name         = each.key
 }
 
 data "aws_caller_identity" "current" {}
@@ -176,113 +186,8 @@ resource "helm_release" "mendix_installer" {
         registry_iam_role            = module.container_registry.container_irsa_role_arn,
         ingress_domainname           = var.domain_name,
         environments_internal_names  = var.environments_internal_names
-        secretsmanager_name          = aws_secretsmanager_secret.apps_secrets.name
     })
   ]
 
   depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
-}
-
-#tfsec:ignore:aws-ssm-secret-use-customer-key
-resource "aws_secretsmanager_secret" "apps_secrets" {
-  name_prefix             = "${module.vpc.cluster_name}-secrets"
-  recovery_window_in_days = 7
-}
-
-resource "aws_secretsmanager_secret_version" "apps_secrets_version" {
-  secret_id = aws_secretsmanager_secret.apps_secrets.id
-  secret_string = jsonencode({
-    storage-service-name = "com.mendix.storage.s3",
-    storage-endpoint     = module.file_storage.filestorage_regional_endpoint,
-    storage-bucket-name  = var.s3_bucket_name,
-    database-type        = "PostgreSQL",
-    database-jdbc-url    = "jdbc:postgresql://${module.databases.database_server_address}:5432/my-app-1?sslmode=prefer",
-    database-name        = "postgres",
-    database-username    = "mendix",
-    database-password    = module.databases.database_password,
-    database-host        = "${module.databases.database_server_address}:5432"
-  })
-}
-#https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/
-#tfsec:ignore:aws-iam-no-policy-wildcards
-resource "aws_iam_role_policy" "app_irsa_policy" {
-  for_each = toset(var.environments_internal_names)
-
-  name = "${module.vpc.cluster_name}-app-policy"
-  role = aws_iam_role.app_irsa_role[each.key].id
-
-  policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Sid" : "VisualEditor0",
-        "Effect" : "Allow",
-        "Action" : [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ],
-
-        "Resource" : aws_secretsmanager_secret.apps_secrets.arn
-      },
-      {
-        "Action" : [
-          "s3:AbortMultipartUpload",
-          "s3:DeleteObject",
-          "s3:GetObject",
-          "s3:ListMultipartUploadParts",
-          "s3:PutObject"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          module.file_storage.filestorage_shared_bucket_arn
-        ]
-      },
-      {
-        "Action" : [
-          "s3:AbortMultipartUpload",
-          "s3:DeleteObject",
-          "s3:GetObject",
-          "s3:ListMultipartUploadParts",
-          "s3:PutObject"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          "${module.file_storage.filestorage_shared_bucket_arn}/*"
-        ]
-      },
-      {
-        "Action" : [
-          "kms:GenerateDataKey"
-        ],
-        "Effect" : "Allow",
-        "Resource" : [
-          module.file_storage.filestorage_kms_key_arn
-        ]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role" "app_irsa_role" {
-  for_each = toset(var.environments_internal_names)
-
-  name = "${module.vpc.cluster_name}-app-role-${each.key}"
-  assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks_blueprints.oidc_provider}"
-        },
-        "Action" : "sts:AssumeRoleWithWebIdentity",
-        "Condition" : {
-          "StringEquals" : {
-            "${module.eks_blueprints.oidc_provider}:aud" : "sts.amazonaws.com",
-            "${module.eks_blueprints.oidc_provider}:sub" : "system:serviceaccount:mendix:${each.key}"
-          }
-        }
-      }
-    ]
-  })
 }

@@ -21,12 +21,12 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - "monitoringg.${hostname}"
+    - "monitoring.${hostname}"
   path: "/"
   tls:
   - hosts:
-    - monitoringg.${hostname}
-    secretName: monitoringg.${hostname}
+    - monitoring.${hostname}
+    secretName: monitoring.${hostname}
 datasources:
  datasources.yaml:
    apiVersion: 1

@@ -12,6 +12,5 @@ ingress:
   className: ""
   domainName: ""
 environmentsInternalNames: []
-secretsmanagerName: ""
 clusterName: ""
 accountID: ""
