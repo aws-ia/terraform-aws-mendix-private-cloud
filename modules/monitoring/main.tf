@@ -41,10 +41,10 @@ resource "helm_release" "grafana" {
     templatefile(
       "${path.module}/helm-values/grafana-values.yaml.tpl",
       {
-        mendix_native  = "${indent(8, templatefile("${path.module}/dashboards/mendix_native.json.tpl", {}))}",
-        pvc_disk_space = "${indent(8, templatefile("${path.module}/dashboards/pvc_disk_space.json.tpl", {}))}",
-        kubernetes     = "${indent(8, templatefile("${path.module}/dashboards/kubernetes.json.tpl", {}))}",
-        rds            = "${indent(8, templatefile("${path.module}/dashboards/rds.json.tpl", {}))}",
+        mendix_native  = indent(8, templatefile("${path.module}/dashboards/mendix_native.json.tpl", {})),
+        pvc_disk_space = indent(8, templatefile("${path.module}/dashboards/pvc_disk_space.json.tpl", {})),
+        kubernetes     = indent(8, templatefile("${path.module}/dashboards/kubernetes.json.tpl", {})),
+        rds            = indent(8, templatefile("${path.module}/dashboards/rds.json.tpl", {})),
         hostname       = var.domain_name
         role_arn       = aws_iam_role.grafana_irsa_role.arn
         admin_password = aws_secretsmanager_secret_version.grafana.secret_string

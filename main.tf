@@ -23,7 +23,6 @@ module "databases" {
 module "file_storage" {
   source         = "./modules/file-storage"
   s3_bucket_name = var.s3_bucket_name
-  s3_user_name   = "${module.vpc.cluster_name}-s3-user"
 }
 
 data "aws_caller_identity" "current" {}
