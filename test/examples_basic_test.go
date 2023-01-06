@@ -46,8 +46,6 @@ func TestExamplesBasicTest(t *testing.T) {
 		"module.mendix_private_cloud_example.module.monitoring.helm_release.loki",
 		"module.mendix_private_cloud_example.module.monitoring.kubernetes_namespace.loki",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons",
-		"module.mendix_private_cloud_example.module.eks_blueprints",
-		"module.mendix_private_cloud_example.module.vpc",
 		"destroy",
 	}
 

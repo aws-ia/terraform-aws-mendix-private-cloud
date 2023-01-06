@@ -204,7 +204,8 @@ resource "aws_secretsmanager_secret_version" "apps_secrets_version" {
     database-host        = "${module.databases.database_server_address}:5432"
   })
 }
-
+#https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/
+#tfsec:ignore:aws-iam-no-policy-wildcards
 resource "aws_iam_role_policy" "app_irsa_policy" {
   for_each = toset(var.environments_internal_names)
 

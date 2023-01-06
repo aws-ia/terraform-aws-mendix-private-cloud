@@ -6,7 +6,7 @@ metadata:
 data:
   mxpc-cli-installer-script: | 
     #/bin/sh
-    wget https://mendix-private-cloud-resources-prod.s3.eu-west-1.amazonaws.com/mxpc-cli/{{ .Values.mendixOperatorVersion }}/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
+    wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic
     ./mxpc-cli apply-config -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --file mendix-installer-config-file/mendix-installer-config-file
