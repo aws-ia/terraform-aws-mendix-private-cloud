@@ -1,0 +1,16 @@
+appName: "{{.Name}}"
+clusterID: ""
+clusterSecret: ""
+mendixOperatorVersion: ""
+awsRegion: ""
+certificateExpirationEmail: ""
+registry:
+  pullUrl: ""
+  repositoryName: ""
+  iamRole: ""
+ingress:
+  className: ""
+  domainName: ""
+environmentsInternalNames: []
+clusterName: ""
+accountID: ""
