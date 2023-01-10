@@ -1,11 +1,11 @@
 resource "aws_kms_key" "cmk_shared_bucket" {
   description             = "KMS key ${var.s3_bucket_name}"
   deletion_window_in_days = 7
-  policy                  = data.aws_iam_policy_document.secret_manager_key.json
+  policy                  = data.aws_iam_policy_document.cmk_shared_bucket.json
   enable_key_rotation     = true
 }
 
-data "aws_iam_policy_document" "secret_manager_key" {
+data "aws_iam_policy_document" "cmk_shared_bucket" {
   statement {
     sid       = "Enable IAM User Permissions"
     effect    = "Allow"
