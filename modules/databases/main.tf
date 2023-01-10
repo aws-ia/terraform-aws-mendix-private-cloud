@@ -111,6 +111,19 @@ resource "aws_iam_role_policy" "app_irsa_policy" {
       },
       {
         "Action" : [
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListMultipartUploadParts",
+          "s3:PutObject"
+        ],
+        "Effect" : "Allow",
+        "Resource" : [
+          "${var.filestorage_shared_bucket_arn}/${var.environment_internal_name}/*"
+        ]
+      },
+      {
+        "Action" : [
           "kms:GenerateDataKey"
         ],
         "Effect" : "Allow",

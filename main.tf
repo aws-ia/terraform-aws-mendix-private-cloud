@@ -9,11 +9,8 @@ resource "aws_route53_zone" "cluster_dns" {
 }
 
 module "file_storage" {
-  source                      = "./modules/file-storage"
-  s3_bucket_name              = var.s3_bucket_name
-  account_id                  = data.aws_caller_identity.current.account_id
-  cluster_name                = module.vpc.cluster_name
-  environments_internal_names = var.environments_internal_names
+  source         = "./modules/file-storage"
+  s3_bucket_name = var.s3_bucket_name
 }
 
 module "databases" {
