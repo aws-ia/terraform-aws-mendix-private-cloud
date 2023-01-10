@@ -1,9 +1,44 @@
 resource "aws_kms_key" "cmk_shared_bucket" {
   description             = "KMS key ${var.s3_bucket_name}"
   deletion_window_in_days = 7
+  policy                  = data.aws_iam_policy_document.secret_manager_key.json
   enable_key_rotation     = true
 }
 
+data "aws_iam_policy_document" "secret_manager_key" {
+  statement {
+    sid       = "Enable IAM User Permissions"
+    effect    = "Allow"
+    actions   = ["kms:*"]
+    resources = ["*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${var.account_id}:root"]
+    }
+  }
+
+  statement {
+    sid    = "Allow use of the key by apps roles"
+    effect = "Allow"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+    resources = ["*"]
+
+    principals {
+      type = "AWS"
+      identifiers = [
+        for app_name in var.environments_internal_names :
+        "arn:aws:iam::${var.account_id}:role/${var.cluster_name}-app-role-${app_name}"
+      ]
+    }
+  }
+}
 
 #S3 versioning and logging disabled for cost reduction
 #tfsec:ignore:*
