@@ -14,17 +14,12 @@ resource "aws_secretsmanager_secret_version" "grafana" {
   secret_string = random_password.grafana.result
 }
 
-resource "kubernetes_namespace" "loki" {
-  metadata {
-    name = "loki"
-  }
-}
-
 resource "helm_release" "loki" {
-  name       = "loki-stack"
-  repository = "https://grafana.github.io/helm-charts"
-  chart      = "loki-stack"
-  namespace  = "loki"
+  name             = "loki-stack"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "loki-stack"
+  namespace        = "loki"
+  create_namespace = true
   values = [
     templatefile("${path.module}/helm-values/loki-stack-values.yaml", {})
   ]

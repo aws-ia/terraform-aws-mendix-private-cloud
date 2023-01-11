@@ -1,3 +1,7 @@
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks_blueprints.eks_cluster_id
+}
+
 module "vpc" {
   source = "./modules/vpc"
   region = var.aws_region
@@ -22,7 +26,6 @@ module "databases" {
   cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
   file_storage_endpoint             = module.file_storage.filestorage_regional_endpoint
   filestorage_shared_bucket_arn     = module.file_storage.filestorage_shared_bucket_arn
-  filestorage_kms_key_arn           = module.file_storage.filestorage_kms_key_arn
   cluster_name                      = module.vpc.cluster_name
   secrets_manager_name              = "${module.vpc.cluster_name}-${each.key}-secrets"
   aws_caller_identity_account_id    = data.aws_caller_identity.current.account_id

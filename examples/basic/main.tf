@@ -10,6 +10,4 @@ module "mendix_private_cloud_example" {
   mendix_operator_version      = var.mendix_operator_version
 }
 
-provider "aws" {
-  region = "eu-central-1"
-}
+provider "aws" {}

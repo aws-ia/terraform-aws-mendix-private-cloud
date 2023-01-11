@@ -2,16 +2,14 @@ package test
 
 import (
 	"fmt"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatchlogs"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
+	"strings"
+	"testing"
 )
 
 func TestExamplesBasicTest(t *testing.T) {
@@ -21,14 +19,10 @@ func TestExamplesBasicTest(t *testing.T) {
 	terraformFolderRelativeToRoot := "examples/basic"
 	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
 
-	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+	terraformOptions := &terraform.Options{
 		TerraformDir: tempTestFolder,
-		MaxRetries:   1,
-		RetryableTerraformErrors: map[string]string{
-			".*Failed to purge the release.*": "Failed to purge the release",
-		},
 		Vars: map[string]interface{}{
-			"aws_region":                   "eu-central-1",
+			"aws_region":                   "us-east-1",
 			"domain_name":                  uniqueId + "domain.com",
 			"certificate_expiration_email": uniqueId + "@test.com",
 			"s3_bucket_name":               uniqueId + "-s3-bucket",
@@ -39,12 +33,14 @@ func TestExamplesBasicTest(t *testing.T) {
 		BackendConfig: map[string]interface{}{
 			"backend": "local",
 		},
-	})
+	}
 
 	// Destroy order
 	modules := []string{
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].module.helm_addon.helm_release.addon[0]",
+		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]",
+		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons",
 		"destroy",
 	}
@@ -56,7 +52,7 @@ func TestExamplesBasicTest(t *testing.T) {
 				terraformOptions := &terraform.Options{
 					TerraformDir: tempTestFolder,
 					Vars: map[string]interface{}{
-						"aws_region":                   "eu-central-1",
+						"aws_region":                   "us-east-1",
 						"domain_name":                  uniqueId + "domain.com",
 						"certificate_expiration_email": uniqueId + "@test.com",
 						"s3_bucket_name":               uniqueId + "-s3-bucket",
@@ -72,12 +68,11 @@ func TestExamplesBasicTest(t *testing.T) {
 				}
 
 				terraform.Destroy(t, terraformOptions)
-				time.Sleep(10 * time.Second)
 			} else {
 				// Clean remaining EKS CloudWatch log group.
 				fmt.Println("Cleaning " + clusterName + " CloudWatch Log group")
 				sess, _ := session.NewSession(&aws.Config{
-					Region: aws.String("eu-central-1"),
+					Region: aws.String("us-east-1"),
 				})
 				client := cloudwatchlogs.New(sess)
 				get := &cloudwatchlogs.DeleteLogGroupInput{

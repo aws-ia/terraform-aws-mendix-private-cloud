@@ -12,8 +12,3 @@ output "filestorage_shared_bucket_arn" {
   description = "S3 shared bucket ARN"
   value       = aws_s3_bucket.apps_shared_bucket.arn
 }
-
-output "filestorage_kms_key_arn" {
-  description = "S3 KMS Key"
-  value       = aws_kms_key.cmk_shared_bucket.arn
-}

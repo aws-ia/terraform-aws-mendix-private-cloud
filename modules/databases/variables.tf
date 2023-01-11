@@ -49,11 +49,6 @@ variable "environment_internal_name" {
   description = "Environment internal name"
 }
 
-variable "filestorage_kms_key_arn" {
-  type        = string
-  description = "S3 KMS Key"
-}
-
 variable "filestorage_shared_bucket_arn" {
   type        = string
   description = "S3 shared bucket ARN"
