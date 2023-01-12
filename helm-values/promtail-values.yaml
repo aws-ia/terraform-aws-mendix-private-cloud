@@ -1,0 +1,3 @@
+ config:
+  clients:
+    - url: http://loki-stack.loki.svc.cluster.local:3100/loki/api/v1/push

@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mxpc-cli-installer
+  namespace: mendix
+spec:
+  template:
+    spec:
+      serviceAccountName: mxpc-cli-installer-sa
+      containers:
+        - name: mxpc-cli-installer
+          image: alpine
+          command: ["/bin/sh", "-c", "wget https://dl.k8s.io/release/v1.25.0/bin/linux/amd64/kubectl; mv kubectl /usr/bin/kubectl; chmod +x /usr/bin/kubectl; /mxpc-cli-installer-script;"]
+          volumeMounts:
+            - name: mxpc-cli-installer-script
+              mountPath: /mxpc-cli-installer-script
+              subPath: mxpc-cli-installer-script
+            - name: mendix-installer-config-file
+              mountPath: mendix-installer-config-file
+              readOnly: true
+      volumes:
+        - name: mxpc-cli-installer-script
+          configMap:
+            name: mxpc-cli-installer-script
+            defaultMode: 0777
+        - name: mendix-installer-config-file
+          secret:
+            secretName: mendix-installer-config-file
+      restartPolicy: Never
