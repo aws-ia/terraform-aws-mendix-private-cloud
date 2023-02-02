@@ -1,11 +1,11 @@
 # General output
 output "region" {
-  description = "AWS region"
+  description = "AWS Region"
   value       = var.region
 }
 
 output "cluster_name" {
-  description = "Kubernetes Cluster Name"
+  description = "Kubernetes cluster name"
   value       = local.cluster_name
 }
 

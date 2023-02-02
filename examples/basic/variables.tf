@@ -1,6 +1,6 @@
 variable "aws_region" {
   type        = string
-  description = "AWS region name"
+  description = "AWS Region name"
 }
 
 variable "domain_name" {
@@ -25,7 +25,7 @@ variable "cluster_secret" {
 
 variable "mendix_operator_version" {
   type        = string
-  description = "Mendix Private Cloud Operator Version"
+  description = "Mendix Private Cloud Operator version"
   default     = "2.10.0"
 }
 

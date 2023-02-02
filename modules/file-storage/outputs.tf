@@ -4,7 +4,7 @@ output "filestorage_endpoint" {
 }
 
 output "filestorage_regional_endpoint" {
-  description = "S3 regional endpoint"
+  description = "S3 Regional endpoint"
   value       = aws_s3_bucket.apps_shared_bucket.bucket_regional_domain_name
 }
 
