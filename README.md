@@ -17,9 +17,7 @@ There is no cost to use this Partner Solution, but you'll be billed for any AWS 
 
 This Partner Solution deploys into a new virtual private cloud (VPC).
 
-![Architecture for Mendix on Amazon EKS](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/terraform-mendix-private-cloud-diagram.png)
-
-<!-- TESTING ... Do the images all come through on the Registry page now? -->
+![Architecture for Mendix on Amazon EKS](https://raw.githubusercontent.com/aws-ia/terraform-aws-mendix-private-cloud/main/doc/deployment_guide/images/terraform-mendix-private-cloud-diagram.png)
 
 As shown in the diagram, this solution sets up the following:
 
@@ -34,13 +32,11 @@ As shown in the diagram, this solution sets up the following:
     * ExternalDNS, which synchronizes exposed Kubernetes services and ingresses with Route 53.
 * A Network Load Balancer to distribute traffic across the Kubernetes nodes.
 * Amazon Simple Storage Service (Amazon S3) to store the files.
-* Amazon Elastic Block Store (Amazon EBS) to \_\_\_. <!---To do what? Do we need to mention the Container Storage Interface (CSI) storage driver in this high-level list? If so, what to say?--->
-* Amazon Relational Database Service (Amazon RDS) for PostgreSQL to \_\_\_. <!---To do what?--->
+* Amazon Elastic Block Store (Amazon EBS) to provide storage for Grafana, Prometheus, and Loki.
+* Amazon Relational Database Service (Amazon RDS) for PostgreSQL to store Mendix application data.
 * Amazon Elastic Container Registry (Amazon ECR) to provide a private registry.
-* AWS Key Management Service (AWS KMS) to \_\_\_. <!---To do what?-->
-* AWS Secrets Manager to replace hardcoded credentials, including passwords, with an API call.
-
-<!---Do we need to mention CoreDNS and Kube-proxy? If so, how to weave them in?--->
+* AWS Key Management Service (AWS KMS) to provide an encryption key for Amazon RDS, Amazon EBS, and AWS Secrets Manager.
+* Secrets Manager to replace hardcoded credentials, including passwords, with an API call.
 
 ## Prerequisites
 
@@ -50,8 +46,6 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
 
 1. Install the latest version of [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
 2. Configure an IAM user with programmatic access and at least [the following IAM permissions](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/deployment-policy.json).
-
-<!-- TESTING ... Does the above link work on the Registry page now? -->
 
 3. Install the latest version of [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 4. Run `aws configure` to configure AWS CLI with the `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, and `REGION` corresponding to your IAM user.
@@ -97,7 +91,7 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
 
 The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation, as shown here:
 
-![Customizing the environment name](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/environments_internal_names.png)
+![Customizing the environment name](https://raw.githubusercontent.com/aws-ia/terraform-aws-mendix-private-cloud/main/doc/deployment_guide/images/environments_internal_names.png)
 
 The internal name must match the name that you specify in the `environments_internal_names` variable when you create your Mendix app.
 
@@ -126,7 +120,7 @@ The internal name must match the name that you specify in the `environments_inte
 
 5. In the developer portal, choose **Cluster Manager**, then choose the **Customization** tab. Enable **External Secrets Store**.
 
-![Customization tab](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/secrets-store.png)
+![Customization tab](https://raw.githubusercontent.com/aws-ia/terraform-aws-mendix-private-cloud/main/doc/deployment_guide/images/secrets-store.png)
 
 6. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
 
