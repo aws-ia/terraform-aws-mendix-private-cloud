@@ -1,10 +1,10 @@
 
 output "region" {
-  description = "AWS region where the cluster is provisioned"
+  description = "AWS Region where the cluster is provisioned"
   value       = module.mendix_private_cloud_example.region
 }
 
 output "cluster_name" {
-  description = "Kubernetes Cluster Name"
+  description = "Kubernetes cluster name"
   value       = module.mendix_private_cloud_example.cluster_name
 }

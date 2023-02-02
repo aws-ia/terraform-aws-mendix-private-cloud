@@ -1,84 +1,76 @@
 <!-- BEGIN_TF_DOCS -->
 # Mendix Partner Solution for Amazon EKS—Terraform module
 
-This Partner Solution uses a Terraform module to deploy an Infrastructure as Code (IaC) project which facilitates the creation of repeatable and disposable environments meeting the requirements of Mendix for Private Cloud on AWS. This solution is for Mendix users who want to deploy apps in the AWS cloud in an automated way.
+This Partner Solution uses a Terraform module to deploy an infrastructure that meets the requirements of [Mendix for Private Cloud](https://www.mendix.com/evaluation-guide/app-lifecycle/mendix-for-private-cloud/). You deploy this solution in an automated way using Amazon Elastic Kubernetes Service (Amazon EKS). The infrastructure is for users of the Mendix application-development platform who want to deploy and manage Mendix apps in the Amazon Web Services (AWS) Cloud.
 
-> The default EKS node instance type used on Mendix on Amazon EKS is optimized to support up to three apps. Deploying more than three apps may have an impact on the performance of your applications. If you want to deploy more apps, you can adjust the default EKS node instance type by editing the value of the `eks_node_instance_type` variable.
+For more information, refer to the [Mendix documentation](https://docs.mendix.com/).
 
-For more information about the Mendix Platform, refer to the [product documentation](https://docs.mendix.com/).
+This Partner Solution was developed by Siemens in collaboration with AWS. Siemens is an [AWS Partner](https://partners.amazonaws.com/partners/001E000000YMRQTIA5/Siemens%20Digital%20Industries%20Software).
 
-### Costs and licenses
+## Costs and licenses
 
-#### AWS
+To use Mendix, you must have an operator license. For more information, refer to [Licensing Mendix for Private Cloud](https://docs.mendix.com/developerportal/deploy/private-cloud/#licensing).
 
 There is no cost to use this Partner Solution, but you'll be billed for any AWS services or resources that this Partner Solution deploys. For more information, refer to the [AWS Partner Solution General Information Guide](https://fwd.aws/rA69w?).
 
-#### Mendix
+## Architecture
 
-For more information about Mendix Private Cloud licenses, see [Licensing Mendix for Private Cloud](https://docs.mendix.com/developerportal/deploy/private-cloud/#licensing).
+This Partner Solution deploys into a new virtual private cloud (VPC).
 
-### Architecture
+![Architecture for Mendix on Amazon EKS](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/terraform-mendix-private-cloud-diagram.png)
 
-This solution deploys into a new virtual private cloud (VPC).
-
-![Architecture for Mendix on Amazon EKS](doc/deployment\_guide/images/terraform-mendix-private-cloud-diagram.png)
+<!-- TESTING ... Do the images all come through on the Registry page now? -->
 
 As shown in the diagram, this solution sets up the following:
 
 * A highly available architecture that spans three Availability Zones.
-* A virtual private cloud (VPC) configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.
-* A Route53 Public HostedZone.
-* A Network Load Balancer to distribute traffic across EKS nodes instances.
-* In the public subnets:
-    * Managed network address translation (NAT) gateways to allow outbound internet access for resources in the private subnets.
-* In the private subnets:
-    * An Amazon Elastic Kubernetes Service cluster with 3 nodes inside an Auto Scaling group with those add-ons:
-        * Amazon EBS CSI Driver
-        * CoreDNS
-        * Kube-proxy
-        * Amazon Relational Database Service (Amazon RDS) for PostgreSQL.
-* The EKS cluster contains:
-    * The Mendix apps and components
-    * Cert-manager
-    * An open-source logging and monitoring solution with Grafana, Prometheus, Loki, and Promtail
-    * ExternalDNS which synchronizes exposed Kubernetes Services and Ingresses with Route53.
-* A private Amazon Elastic Container Registry.
-* AWS Secrets Manager to replace hardcoded credentials, including passwords, with an API call.
-* AWS Key Management Service.
+* A VPC configured with public and private subnets, according to AWS best practices, to provide you with your own virtual network on AWS.
+* An Amazon Route 53 public hosted zone that routes incoming internet traffic.
+* In the public subnets, managed NAT gateways to allow outbound internet access for resources in the private subnet.
+* In the private subnets, Amazon EKS clusters—each with three Kubernetes nodes—inside an Auto Scaling group. Each node is an Amazon Elastic Compute Cloud (Amazon EC2) instance. Each cluster contains the following (not shown):
+    * Mendix apps and components.
+    * Cert-manager.
+    * An open-source logging and monitoring solution with Grafana, Prometheus, Loki, and Promtail.
+    * ExternalDNS, which synchronizes exposed Kubernetes services and ingresses with Route 53.
+* A Network Load Balancer to distribute traffic across the Kubernetes nodes.
 * Amazon Simple Storage Service (Amazon S3) to store the files.
+* Amazon Elastic Block Store (Amazon EBS) to \_\_\_. <!---To do what? Do we need to mention the Container Storage Interface (CSI) storage driver in this high-level list? If so, what to say?--->
+* Amazon Relational Database Service (Amazon RDS) for PostgreSQL to \_\_\_. <!---To do what?--->
+* Amazon Elastic Container Registry (Amazon ECR) to provide a private registry.
+* AWS Key Management Service (AWS KMS) to \_\_\_. <!---To do what?-->
+* AWS Secrets Manager to replace hardcoded credentials, including passwords, with an API call.
 
-### Prerequisites
+<!---Do we need to mention CoreDNS and Kube-proxy? If so, how to weave them in?--->
 
-Before you can provision your Mendix environments on Amazon EKS, you must first install and configure the required tools, as well as configure the necessary settings in Terraform and in Mendix Private Cloud.
+## Prerequisites
 
-#### Tools
+Before you can provision your Mendix environments on Amazon EKS, you must install and configure the required tools, configure Mendix Private Cloud, and configure Terraform.
 
-To configure the required tools, perform the following steps:
+### Install and configure the required tools
 
 1. Install the latest version of [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli).
-2. Configure an IAM user with programmatic access and at least [the following IAM permissions](deployment-policy.json).
+2. Configure an IAM user with programmatic access and at least [the following IAM permissions](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/deployment-policy.json).
+
+<!-- TESTING ... Does the above link work on the Registry page now? -->
+
 3. Install the latest version of [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
-4. Execute `aws configure` to configure AWS CLI with the `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, and `REGION` corresponding to your IAM user.
+4. Run `aws configure` to configure AWS CLI with the `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, and `REGION` corresponding to your IAM user.
 5. Install the latest version of [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html).
 6. Install the latest version of [kubectl](https://kubernetes.io/docs/tasks/tools/).
 7. Download [GNU Wget](https://www.gnu.org/software/wget/) (required for the Terraform EKS module).
 
-#### Mendix Private Cloud
+### Configure Mendix Private Cloud
 
-To configure your Mendix private cloud environment, perform the following steps:
-
-1. Ensure that your [Mendix Runtime](https://docs.mendix.com/refguide/runtime/) version is 9.21 or newer.
-2. Create your Mendix app. For more information, see [Deploying a Mendix App to a Private Cloud Cluster](https://docs.mendix.com/developerportal/deploy/private-cloud-deploy/).
-3. Register a [new EKS cluster](https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/#create-cluster).
+1. Confirm that your [Mendix Runtime](https://docs.mendix.com/refguide/runtime/) version is 9.21 or newer.
+2. Create your Mendix app. For more information, refer to [Deploying a Mendix App to a Private Cloud Cluster](https://docs.mendix.com/developerportal/deploy/private-cloud-deploy/).
+3. Register a new EKS cluster. For more information, refer to [Creating a Cluster and Namespace](https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/#create-cluster).
 4. [Add a new connected namespace](https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/#add-namespace) called *mendix*.
 5. Retrieve the cluster ID and the cluster secret in the [Installation tab](https://docs.mendix.com/developerportal/deploy/private-cloud-cluster/#download-configuration-tool) for your namespace.
 
-#### Terraform
+### Configure Terraform
 
-To configure Terraform, perform the following steps:
-
-1. Provision an S3 bucket with your desired name and a DynamoDB table with the partition key `LockID` (String type), to store the state file and have a locking mechanism respectively.
-2. Edit the `providers.tf` as in the following example:
+1. Provision an S3 bucket with your desired name and an Amazon DynamoDB table with the partition key `LockID` (string type) to store the state file and have a locking mechanism, respectively.
+2. Edit `providers.tf`, filling in your information, as in the following example:
 
     ```
     terraform {
@@ -91,7 +83,7 @@ To configure Terraform, perform the following steps:
       }
     ```
 
-3. Edit the `terraform.tfvars` as in the following example:
+3. Edit `terraform.tfvars`, filling in your information, as in the following example:
 
     ```
     aws_region                   = ""
@@ -103,72 +95,73 @@ To configure Terraform, perform the following steps:
     environments_internal_names  = ["app1", "app2", "app3"]
     ```
 
-The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation:
+The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation, as shown here:
 
-![Customizing the environment name](doc/deployment\_guide/images/environments\_internal\_names.png)
+![Customizing the environment name](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/environments_internal_names.png)
 
-> When you create your Mendix app, the internal name must be the same as the one specified in the `environments_internal_names` variable.
+The internal name must match the name that you specify in the `environments_internal_names` variable when you create your Mendix app.
 
-### Usage
+## Provision a new environment
 
-To provision a new environment, perform the following steps:
-
-1. Execute the following commands:
+1. Run the following commands:
 
     ```
     terraform init
     terraform apply
     ```
 
-2. Once everything has been successfully provisioned, run the following command to retrieve the access credentials for your new cluster and automatically configure kubectl:
+2. After everything has been provisioned, run the following command to retrieve the access credentials for your new cluster and automatically configure kubectl:
 
     ```
     aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
     ```
 
-3. To retrieve the *aws\_route53\_zone\_name\_servers* generated using the AWS Console, click **Route53** > **Hosted Zone**, or run the following command:
+3. Retrieve the *aws\_route53\_zone\_name\_servers* that were generated using the AWS Console. To do so, either choose **Route53** > **Hosted Zone** or run the following command:
 
     ```
     terraform output aws_route53_zone_name_servers
     ```
 
-4. Depending on your provider, update your **External Domain Name Registrar** or **Route53 registered domain** with the *aws\_route53\_zone\_name\_servers* values. For more information, see [Route53 Documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
-5. Enable the External Secrets Store in the **Customization** tab of the **Cluster Manager** in Developer Portal.
+4. Depending on your provider, update **External Domain Name Registrar** or **Route53 registered domain** with the *aws\_route53\_zone\_name\_servers* values. For more information, refer to [Configuring Amazon Route 53 as your DNS service](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
 
-![Customization tab](doc/deployment\_guide/images/secrets-store.png)
+5. In the developer portal, choose **Cluster Manager**, then choose the **Customization** tab. Enable **External Secrets Store**.
 
-### Security
+![Customization tab](https://github.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/secrets-store.png)
 
-#### Cluster endpoint
+6. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
+
+## Security
+
+### Cluster endpoint
 
 Kubernetes API requests within your cluster's VPC (such as node to control plane communication) use the private VPC endpoint.
 
-Your cluster API server is accessible from the internet. If required, you can limit the CIDR blocks that can access the public endpoint by configuring the `allowed_ips` variable. For more information, see [Amazon EKS cluster endpoint access control](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html) in the Amazon EKS Documentation.
+Your cluster API server is accessible from the internet. If required, you can limit the CIDR blocks that can access the public endpoint by configuring the `allowed_ips` variable. For more information, refer to [Amazon EKS cluster endpoint access control](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html).
 
-#### Encryption
+### Encryption
 
 All the EBS volumes, the RDS PostgreSQL database, and the S3 storage bucket are encrypted at rest. The end-to-end TLS encryption is handled at the Ingress NGINX Controller level. A certificate is generated for each app by *cert-manager*, configured with a *Let’s Encrypt* certificate issuer.
 
-### Automatic scaling
+## Automatic scaling
 
-All the Amazon EKS nodes are placed in an Auto Scaling group, but the [Kubernetes Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) is not installed by default. The Cluster Autoscaler provides automatic
-scale-up and scale-down by allowing Kubernetes to modify the Amazon EC2 Auto Scaling groups.
+While all the Amazon EKS nodes are placed in an Auto Scaling group, the [Kubernetes Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) is not installed by default. The Cluster Autoscaler automatically
+scales up and down by allowing Kubernetes to modify the Amazon EC2 Auto Scaling groups.
 
-### Logging and monitoring
+## Logging and monitoring
 
-A basic logging and monitoring stack contaning Prometheus, Grafana, Loki and Promtail is available at the following URL: `https://monitoring.{domain_name}`
+A basic logging and monitoring stack containing Prometheus, Grafana, Loki and Promtail is available at the following URL: `https://monitoring.{domain_name}`
 
-To retrieve the Grafana admin credentials, run the following command:
+To retrieve the Grafana administrative credentials, run the following command:
 
 ```
 terraform output -json grafana_admin_password
 ```
 
-### Troubleshooting
+## Troubleshooting
 
-If you encounter any issues while provisioning your Mendix environments on Amazon EKS, use the following troubleshooting tips to help you solve them.
+If you encounter any issues while provisioning your Mendix environments on AWS, use the following troubleshooting tips.
 
-#### Terraform registry does not have a package available (Mac)
+### The Terraform Registry does not have a package available (Mac)
 
 When initializing Terraform, Apple M1 users may encounter the following error:
 
@@ -176,9 +169,7 @@ When initializing Terraform, Apple M1 users may encounter the following error:
 │ Provider Terraform Registry 38 v2.2.0 does not have a
 │ package available for your current platform, darwin_arm64
 ```
-##### Solution
-
-Install [m1-terraform-provider-helper](https://github.com/kreuzwerker/m1-terraform-provider-helper):
+**Solution:** Install [m1-terraform-provider-helper](https://github.com/kreuzwerker/m1-terraform-provider-helper):
 
 ```
 brew install kreuzwerker/taps/m1-terraform-provider-helper
@@ -186,17 +177,13 @@ m1-terraform-provider-helper activate
 m1-terraform-provider-helper install hashicorp/template -v v2.2.0
 ```
 
-#### Cluster waiting for connection
+### My cluster never connects
 
-In the Mendix Private Cloud Portal, in the Cluster Manager, the status of your cluster is shown as **Waiting for Connection**, but the cluster never connects.
+In the Mendix Private Cloud portal, in the Cluster Manager, the status of your cluster is shown as **Waiting for Connection**, but the cluster never connects.
 
-##### Cause
+**Cause:** The Mendix Agent or the Mendix Operator may not be configured correctly or may not be connected.
 
-This issue may occur if the Mendix Agent or the Mendix Operator are not configured correctly, or if they are not connected.
-
-##### Solution
-
-To solve this issue, perform the following steps:
+**Solution:** Perform the following steps:
 
 1. Retrieve the logs of the installer job by running the following command:
 
@@ -224,9 +211,9 @@ To solve this issue, perform the following steps:
     terraform plan; terraform apply --auto-approve
     ```
 
-### Cleanup
+## Cleanup
 
-To completely clean up your environment, run the following commands:
+To clean up your environment, run the following commands:
 
 ```
 terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].module.helm_addon.helm_release.addon[0]" -auto-approve
@@ -237,11 +224,11 @@ terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approv
 terraform destroy -auto-approve
 ```
 
-### License
+## License
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-### Customer responsibility
+## Customer responsibility
 
 After you deploy this Partner Solution, confirm that your resources and services are updated and configured—including any required patches—to meet your security and other needs. For more information, refer to the [AWS Shared Responsibility Model](https://aws.amazon.com/compliance/shared-responsibility-model/).
 
@@ -292,7 +279,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region name | `string` | n/a | yes |
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS Region name | `string` | n/a | yes |
 | <a name="input_certificate_expiration_email"></a> [certificate\_expiration\_email](#input\_certificate\_expiration\_email) | Let's Encrypt certificate expiration email | `string` | n/a | yes |
 | <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | Mendix Private Cloud Cluster ID | `string` | n/a | yes |
 | <a name="input_cluster_secret"></a> [cluster\_secret](#input\_cluster\_secret) | Mendix Private Cloud Cluster Secret | `string` | n/a | yes |
@@ -301,15 +288,15 @@ After you deploy this Partner Solution, confirm that your resources and services
 | <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
 | <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
 | <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1"<br>]</pre> | no |
-| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator Version | `string` | `"2.10.0"` | no |
+| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.10.0"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_aws_route53_zone"></a> [aws\_route53\_zone](#output\_aws\_route53\_zone) | Route53 Hosted Zone ID |
-| <a name="output_aws_route53_zone_name_servers"></a> [aws\_route53\_zone\_name\_servers](#output\_aws\_route53\_zone\_name\_servers) | Route53 Hosted Zone Nameservers |
-| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Kubernetes Cluster Name |
+| <a name="output_aws_route53_zone"></a> [aws\_route53\_zone](#output\_aws\_route53\_zone) | Route 53 hosted zone ID |
+| <a name="output_aws_route53_zone_name_servers"></a> [aws\_route53\_zone\_name\_servers](#output\_aws\_route53\_zone\_name\_servers) | Route 53 hosted zone nameservers |
+| <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | Kubernetes cluster name |
 | <a name="output_cluster_vpc_id"></a> [cluster\_vpc\_id](#output\_cluster\_vpc\_id) | VPC ID |
 | <a name="output_container_irsa_role_arn"></a> [container\_irsa\_role\_arn](#output\_container\_irsa\_role\_arn) | Elatic Container Registry IAM Role ARN |
 | <a name="output_container_registry_name"></a> [container\_registry\_name](#output\_container\_registry\_name) | Elatic Container Registry name |
@@ -321,7 +308,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | <a name="output_filestorage_endpoint"></a> [filestorage\_endpoint](#output\_filestorage\_endpoint) | S3 endpoint |
 | <a name="output_filestorage_regional_endpoint"></a> [filestorage\_regional\_endpoint](#output\_filestorage\_regional\_endpoint) | S3 regional endpoint |
 | <a name="output_grafana_admin_password"></a> [grafana\_admin\_password](#output\_grafana\_admin\_password) | Grafana admin password |
-| <a name="output_region"></a> [region](#output\_region) | AWS region where the cluster is provisioned |
+| <a name="output_region"></a> [region](#output\_region) | AWS Region where the cluster is provisioned |
 | <a name="output_vpc_private_subnets"></a> [vpc\_private\_subnets](#output\_vpc\_private\_subnets) | VPC private subnets |
 | <a name="output_vpc_public_subnets"></a> [vpc\_public\_subnets](#output\_vpc\_public\_subnets) | VPC public subnets |
 <!-- END_TF_DOCS -->

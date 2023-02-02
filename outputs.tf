@@ -1,13 +1,13 @@
 
 # General output
 output "region" {
-  description = "AWS region where the cluster is provisioned"
+  description = "AWS Region where the cluster is provisioned"
   value       = module.vpc.region
 }
 
 # Kubernetes cluster
 output "cluster_name" {
-  description = "Kubernetes Cluster Name"
+  description = "Kubernetes cluster name"
   value       = module.vpc.cluster_name
 }
 
@@ -93,11 +93,11 @@ output "grafana_admin_password" {
 
 # Route53 output
 output "aws_route53_zone" {
-  description = "Route53 Hosted Zone ID"
+  description = "Route 53 hosted zone ID"
   value       = aws_route53_zone.cluster_dns.id
 }
 
 output "aws_route53_zone_name_servers" {
-  description = "Route53 Hosted Zone Nameservers"
+  description = "Route 53 hosted zone nameservers"
   value       = aws_route53_zone.cluster_dns.name_servers
 }

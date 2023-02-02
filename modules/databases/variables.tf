@@ -20,7 +20,7 @@ variable "rds_instance_class" {
 }
 
 variable "file_storage_endpoint" {
-  description = "S3 regional endpoint"
+  description = "S3 Regional endpoint"
   type        = string
 }
 
@@ -31,7 +31,7 @@ variable "secrets_manager_name" {
 
 variable "cluster_name" {
   type        = string
-  description = "Kubernetes Cluster Name"
+  description = "Kubernetes cluster name"
 }
 
 variable "aws_caller_identity_account_id" {

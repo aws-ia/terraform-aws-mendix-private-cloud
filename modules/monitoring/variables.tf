@@ -1,6 +1,6 @@
 variable "aws_region" {
   type        = string
-  description = "AWS region name"
+  description = "AWS Region name"
 }
 
 variable "account_id" {
@@ -10,7 +10,7 @@ variable "account_id" {
 
 variable "cluster_name" {
   type        = string
-  description = "Kubernetes Cluster Name"
+  description = "Kubernetes cluster name"
 }
 
 variable "oidc_provider" {
