@@ -17,7 +17,7 @@ There is no cost to use this Partner Solution, but you'll be billed for any AWS 
 
 This Partner Solution deploys into a new virtual private cloud (VPC).
 
-![Architecture for Mendix on Amazon EKS](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/terraform-mendix-private-cloud-diagram.png)
+![Architecture for Mendix on Amazon EKS](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/main/doc/deployment_guide/images/terraform-mendix-private-cloud-diagram.png)
 
 <!-- TESTING ... Do the images all come through on the Registry page now? -->
 
@@ -97,7 +97,7 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
 
 The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation, as shown here:
 
-![Customizing the environment name](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/environments_internal_names.png)
+![Customizing the environment name](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/main/doc/deployment_guide/images/environments_internal_names.png)
 
 The internal name must match the name that you specify in the `environments_internal_names` variable when you create your Mendix app.
 
@@ -126,7 +126,7 @@ The internal name must match the name that you specify in the `environments_inte
 
 5. In the developer portal, choose **Cluster Manager**, then choose the **Customization** tab. Enable **External Secrets Store**.
 
-![Customization tab](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/blob/main/doc/deployment_guide/images/secrets-store.png)
+![Customization tab](https://raw.githubusercontent.com/aws-ia/terraform-mendix-private-cloud/main/doc/deployment_guide/images/secrets-store.png)
 
 6. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
 
