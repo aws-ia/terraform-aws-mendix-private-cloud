@@ -167,7 +167,7 @@ resource "kubernetes_namespace" "mendix" {
 
 resource "helm_release" "mendix_installer" {
   name      = "mendixinstaller"
-  chart     = "./charts/mendix-installer"
+  chart     = "${path.module}/charts/mendix-installer"
   namespace = "mendix"
   values = [
     templatefile("${path.module}/helm-values/mendix-installer-values.yaml.tpl",
