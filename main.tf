@@ -119,8 +119,13 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
   enable_external_dns = true
+  external_dns_route53_zone_arns = [
+    aws_route53_zone.cluster_dns.arn
+  ]
   external_dns_helm_config = {
-    values = [templatefile("${path.module}/helm-values/external-dns-values.yaml", {})]
+    values = [templatefile("${path.module}/helm-values/external-dns-values.yaml", {
+      hostname = var.domain_name
+    })]
   }
 
   enable_ingress_nginx = true
