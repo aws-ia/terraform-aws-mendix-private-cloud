@@ -1,3 +1,4 @@
 ## Modify how DNS records are sychronized between sources and providers (options: sync, upsert-only)
 policy: sync
-domainFilters: [${hostname}]
+domainFilters:
+  - ${hostname}
