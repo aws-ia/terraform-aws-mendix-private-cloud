@@ -3,7 +3,7 @@
 
 This Amazon Web Services (AWS) Partner Solution uses a [Terraform module](https://registry.terraform.io/modules/aws-ia/mendix-private-cloud/aws/latest) to deploy an infrastructure that meets the requirements of [Mendix for Private Cloud](https://www.mendix.com/evaluation-guide/app-lifecycle/mendix-for-private-cloud/). You deploy this solution in an automated way using Amazon Elastic Kubernetes Service (Amazon EKS). The infrastructure is for users of the Mendix application-development platform who want to deploy and manage Mendix apps in the AWS Cloud.
 
-For more information, refer to the [Mendix documentation](https://docs.mendix.com/).
+For more information, refer to the [Mendix documentation](https://docs.mendix.com/). If you have questions, feedback, or ideas, you can post them in the [Mendix Forum about AWS](https://forum.mendix.com/link/space/aws).
 
 This Partner Solution was developed by Siemens in collaboration with AWS. Siemens is an [AWS Partner](https://partners.amazonaws.com/partners/001E000000YMRQTIA5/Siemens%20Digital%20Industries%20Software). Mendix is a wholly owned subsidiary of Siemens.
 
