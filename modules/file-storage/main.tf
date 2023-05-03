@@ -11,8 +11,6 @@ resource "aws_s3_bucket_ownership_controls" "apps_shared_bucket" {
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
-
-  depends_on = [aws_s3_bucket_acl.apps_shared_bucket_acl]
 }
 
 #tfsec:ignore:aws-s3-encryption-customer-key
