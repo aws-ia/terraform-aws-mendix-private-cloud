@@ -36,4 +36,6 @@ resource "aws_s3_bucket_public_access_block" "apps_shared_bucket" {
 resource "aws_s3_bucket_acl" "apps_shared_bucket_acl" {
   bucket = aws_s3_bucket.apps_shared_bucket.id
   acl    = "private"
+
+  depends_on = [aws_s3_bucket_ownership_controls.apps_shared_bucket]
 }
