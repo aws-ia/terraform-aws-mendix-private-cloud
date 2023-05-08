@@ -8,7 +8,7 @@ data:
     #/bin/sh
     wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
-    ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic
+    ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
     ./mxpc-cli apply-config -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --file mendix-installer-config-file/mendix-installer-config-file
     kubectl -n mendix patch OperatorConfiguration mendix-operator-configuration --type merge --patch '{"spec":{"endpoint":{"ingress":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod"}}}}}'
     kubectl -n mendix patch OperatorConfiguration mendix-operator-configuration --type merge --patch '{"spec":{"endpoint":{"ingress":{"tlsSecretName":"tls-{{ .Values.appName }}"}}}}'
