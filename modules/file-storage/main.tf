@@ -5,6 +5,14 @@ resource "aws_s3_bucket" "apps_shared_bucket" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket_ownership_controls" "apps_shared_bucket" {
+  bucket = aws_s3_bucket.apps_shared_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
 #tfsec:ignore:aws-s3-encryption-customer-key
 resource "aws_s3_bucket_server_side_encryption_configuration" "apps_shared_bucket" {
   bucket = aws_s3_bucket.apps_shared_bucket.bucket
@@ -28,4 +36,6 @@ resource "aws_s3_bucket_public_access_block" "apps_shared_bucket" {
 resource "aws_s3_bucket_acl" "apps_shared_bucket_acl" {
   bucket = aws_s3_bucket.apps_shared_bucket.id
   acl    = "private"
+
+  depends_on = [aws_s3_bucket_ownership_controls.apps_shared_bucket]
 }
