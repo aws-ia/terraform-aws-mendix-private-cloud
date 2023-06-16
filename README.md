@@ -88,6 +88,8 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
     cluster_secret               = ""
     environments_internal_names  = ["app1", "app2", "app3"]
     ```
+   
+**Important: Do not reuse the same S3 bucket created in Step 1 for the `s3_bucket_name` field. Terraform will create a new bucket with given name.**
 
 The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation, as shown here:
 
