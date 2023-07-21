@@ -10,7 +10,7 @@ spec:
       containers:
         - name: mxpc-cli-installer
           image: alpine
-          command: ["/bin/sh", "-c", "wget https://dl.k8s.io/release/v1.25.0/bin/linux/amd64/kubectl; mv kubectl /usr/bin/kubectl; chmod +x /usr/bin/kubectl; /mxpc-cli-installer-script;"]
+          command: ["/bin/sh", "-c", "apk --update add postgresql-client; wget https://dl.k8s.io/release/v1.25.0/bin/linux/amd64/kubectl; mv kubectl /usr/bin/kubectl; chmod +x /usr/bin/kubectl; /mxpc-cli-installer-script;"]
           volumeMounts:
             - name: mxpc-cli-installer-script
               mountPath: /mxpc-cli-installer-script
@@ -18,6 +18,14 @@ spec:
             - name: mendix-installer-config-file
               mountPath: mendix-installer-config-file
               readOnly: true
+{{- range $.Values.database_plans }}
+            - name: "mendix-installer-config-db-{{ .name }}"
+              mountPath: "mendix-installer-config-db-{{ .name }}"
+              readOnly: true
+            - name: "mendix-rds-master-pass-{{ .name }}"
+              mountPath: "mendix-rds-master-pass-{{ .name }}"
+              readOnly: true
+{{- end }}
       volumes:
         - name: mxpc-cli-installer-script
           configMap:
@@ -26,4 +34,12 @@ spec:
         - name: mendix-installer-config-file
           secret:
             secretName: mendix-installer-config-file
+{{- range $.Values.database_plans }}
+        - name: "mendix-installer-config-db-{{ .name }}"
+          secret:
+            secretName: "mendix-installer-config-db-{{ .name }}"
+        - name: "mendix-rds-master-pass-{{ .name }}"
+          secret:
+            secretName: "mendix-rds-master-pass-{{ .name }}"
+{{- end }}
       restartPolicy: Never

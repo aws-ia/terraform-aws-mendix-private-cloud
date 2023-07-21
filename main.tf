@@ -24,13 +24,58 @@ module "databases" {
   identifier                        = "${module.vpc.cluster_name}-database-${each.key}"
   subnets                           = module.vpc.vpc_private_subnets
   cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
-  file_storage_endpoint             = module.file_storage.filestorage_regional_endpoint
-  filestorage_shared_bucket_arn     = module.file_storage.filestorage_shared_bucket_arn
-  cluster_name                      = module.vpc.cluster_name
-  secrets_manager_name              = "${module.vpc.cluster_name}-${each.key}-secrets"
-  aws_caller_identity_account_id    = data.aws_caller_identity.current.account_id
-  oidc_provider                     = module.eks_blueprints.oidc_provider
-  environment_internal_name         = each.key
+}
+
+resource "aws_iam_policy" "environment-policy" {
+  name        = "${module.vpc.cluster_name}-env-policy"
+  description = "Environment Template Policy"
+
+  policy = templatefile("./templates/iam_environment_policy.tftpl", {
+    aws_region                     = var.aws_region
+    aws_account_id                 = data.aws_caller_identity.current.account_id
+    db_instance_resource_ids       = [for value in values(module.databases) : tostring(value.database_resource_id[0])]
+    filestorage_shared_bucket_name = var.s3_bucket_name
+  })
+}
+
+resource "aws_iam_policy" "provisioner-policy" {
+  name        = "${module.vpc.cluster_name}-provisioner-policy"
+  description = "Storage Provisioner admin Policy"
+
+  policy = templatefile("./templates/iam_provisioner_policy.tftpl", {
+    aws_region                     = var.aws_region
+    aws_account_id                 = data.aws_caller_identity.current.account_id
+    db_instance_resource_ids       = [for value in values(module.databases) : tostring(value.database_resource_id[0])]
+    db_instance_usernames          = [for value in values(module.databases) : tostring(value.database_username[0])]
+    filestorage_shared_bucket_name = var.s3_bucket_name
+    environment_policy_arn         = aws_iam_policy.environment-policy.arn
+  })
+}
+
+resource "aws_iam_role" "storage-provisioner-role" {
+  name        = "${module.vpc.cluster_name}-storage-provisioner-irsa"
+  description = "Storage Provisioner admin Policy"
+
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${module.eks_blueprints.oidc_provider}"
+        },
+        "Action" : "sts:AssumeRoleWithWebIdentity",
+        "Condition" : {
+          "StringEquals" : {
+            "${module.eks_blueprints.oidc_provider}:aud" : "sts.amazonaws.com",
+            "${module.eks_blueprints.oidc_provider}:sub" : "system:serviceaccount:mendix:mendix-storage-provisioner"
+          }
+        }
+      }
+    ]
+  })
+
+  managed_policy_arns = [aws_iam_policy.provisioner-policy.arn]
 }
 
 data "aws_caller_identity" "current" {}
@@ -110,14 +155,6 @@ module "eks_blueprints_kubernetes_addons" {
   # Add-ons
   enable_aws_load_balancer_controller = true
 
-  enable_secrets_store_csi_driver              = true
-  enable_secrets_store_csi_driver_provider_aws = true
-  csi_secrets_store_provider_aws_helm_config = {
-    values = [templatefile("${path.module}/helm-values/csi-secrets-store-provider-aws.yaml", {
-      hostname = var.domain_name
-    })]
-  }
-
   enable_external_dns = true
   external_dns_route53_zone_arns = [
     aws_route53_zone.cluster_dns.arn
@@ -177,18 +214,27 @@ resource "helm_release" "mendix_installer" {
   values = [
     templatefile("${path.module}/helm-values/mendix-installer-values.yaml.tpl",
       {
-        cluster_name                 = module.vpc.cluster_name,
-        account_id                   = data.aws_caller_identity.current.account_id,
-        cluster_id                   = var.cluster_id,
-        cluster_secret               = sensitive(var.cluster_secret),
-        mendix_operator_version      = var.mendix_operator_version,
-        aws_region                   = module.vpc.region,
-        certificate_expiration_email = var.certificate_expiration_email
-        registry_pullurl             = module.container_registry.container_registry_hostname,
-        registry_repository          = module.container_registry.container_registry_name,
-        registry_iam_role            = module.container_registry.container_irsa_role_arn,
-        ingress_domainname           = var.domain_name,
-        environments_internal_names  = var.environments_internal_names
+        cluster_name                       = module.vpc.cluster_name,
+        account_id                         = data.aws_caller_identity.current.account_id,
+        cluster_id                         = var.cluster_id,
+        cluster_secret                     = sensitive(var.cluster_secret),
+        mendix_operator_version            = var.mendix_operator_version,
+        aws_region                         = module.vpc.region,
+        certificate_expiration_email       = var.certificate_expiration_email
+        s3_bucket_name                     = var.s3_bucket_name
+        environment_iam_template_policy    = aws_iam_policy.environment-policy.arn
+        storage_provisioner_iam_admin_role = aws_iam_role.storage-provisioner-role.arn
+        oidc_url                           = "https://${module.eks_blueprints.oidc_provider}"
+        database_server_addresses          = [for value in values(module.databases) : tostring(value.database_server_address[0])]
+        database_ports                     = [for value in values(module.databases) : tostring(value.database_port[0])]
+        database_usernames                 = [for value in values(module.databases) : tostring(value.database_username[0])]
+        database_names                     = [for value in values(module.databases) : tostring(value.database_name[0])]
+        database_passwords                 = [for value in values(module.databases) : tostring(value.database_password[0])]
+        registry_pullurl                   = module.container_registry.container_registry_hostname,
+        registry_repository                = module.container_registry.container_registry_name,
+        registry_iam_role                  = module.container_registry.container_irsa_role_arn,
+        ingress_domainname                 = var.domain_name,
+        environments_internal_names        = var.environments_internal_names
     })
   ]
 

@@ -6,10 +6,28 @@ metadata:
 data:
   mxpc-cli-installer-script: | 
     #/bin/sh
+    
     wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
-    ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic
+    ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
+    
+    wget --output-document=custom.crt https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+    kubectl -n mendix create secret generic mendix-custom-tls --from-file=custom.crt=custom.crt
+    
     ./mxpc-cli apply-config -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --file mendix-installer-config-file/mendix-installer-config-file
+
+{{- range $.Values.database_plans }}
+    ./mxpc-cli apply-config -i {{ $.Values.clusterID }} -s {{ $.Values.clusterSecret }} --file mendix-installer-config-db-{{ .name }}/mendix-installer-config-file
+  
+    export PGUSER={{ .user }}
+    export PGHOST={{ .host }}
+    export PGPASSWORD=$(cat mendix-rds-master-pass-{{ .name }}/rds-password)
+
+    psql -c 'GRANT rds_iam TO {{ .user }};'
+    
+    kubectl -n mendix delete secret mendix-rds-master-pass-{{ .name }}
+{{- end }}
+
     kubectl -n mendix patch OperatorConfiguration mendix-operator-configuration --type merge --patch '{"spec":{"endpoint":{"ingress":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod"}}}}}'
     kubectl -n mendix patch OperatorConfiguration mendix-operator-configuration --type merge --patch '{"spec":{"endpoint":{"ingress":{"tlsSecretName":"tls-{{ .Values.appName }}"}}}}'
     kubectl -n mendix patch OperatorConfiguration mendix-operator-configuration --type merge --patch '{"spec":{"runtimeAutomountServiceAccountToken":true,"runtimeDeploymentPodAnnotations":{"linkerd.io/inject":"enabled","prometheus.io/path":"/metrics","prometheus.io/port":"8900","prometheus.io/scrape":"true"}}}'
