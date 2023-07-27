@@ -11,6 +11,21 @@ registry:
 ingress:
   className: ""
   domainName: ""
+database_plans:
+  - name: ""
+    host: ""
+    aws_iam_role: ""
+    kubernetes_service_account: ""
+    port: ""
+    user: ""
+    db_name: ""
+    master_password: ""
+storage_plan:
+  existing_bucket: ""
+  existing_policy: ""
+  admin_iam_role: ""
+  oidc_url: ""
+  kubernetes_service_account: ""
 environmentsInternalNames: []
 clusterName: ""
 accountID: ""
