@@ -9,15 +9,15 @@ data:
     
     wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
-    ./mxpc-cli base-install --namespace mendix -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
+    ./mxpc-cli base-install --namespace mendix -i {{ .Values.namespaceID }} -s {{ .Values.namespaceSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
     
     wget --output-document=custom.crt https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
     kubectl -n mendix create secret generic mendix-custom-tls --from-file=custom.crt=custom.crt
     
-    ./mxpc-cli apply-config -i {{ .Values.clusterID }} -s {{ .Values.clusterSecret }} --file mendix-installer-config-file/mendix-installer-config-file
+    ./mxpc-cli apply-config -i {{ .Values.namespaceID }} -s {{ .Values.namespaceSecret }} --file mendix-installer-config-file/mendix-installer-config-file
 
 {{- range $.Values.database_plans }}
-    ./mxpc-cli apply-config -i {{ $.Values.clusterID }} -s {{ $.Values.clusterSecret }} --file mendix-installer-config-db-{{ .name }}/mendix-installer-config-file
+    ./mxpc-cli apply-config -i {{ $.Values.namespaceID }} -s {{ $.Values.namespaceSecret }} --file mendix-installer-config-db-{{ .name }}/mendix-installer-config-file
   
     export PGUSER={{ .user }}
     export PGHOST={{ .host }}

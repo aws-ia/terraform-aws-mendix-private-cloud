@@ -1,6 +1,6 @@
 appName: "{{.Name}}"
-clusterID: ""
-clusterSecret: ""
+namespaceID: ""
+namespaceSecret: ""
 mendixOperatorVersion: ""
 awsRegion: ""
 certificateExpirationEmail: ""

@@ -1,10 +1,21 @@
+locals {
+  cluster_name = "${var.eks_cluster_name_prefix}-${random_string.random-eks-suffix.result}"
+}
+
+resource "random_string" "random-eks-suffix" {
+  length    = 3
+  min_lower = 3
+  special   = false
+}
+
 data "aws_eks_cluster_auth" "this" {
   name = module.eks_blueprints.eks_cluster_id
 }
 
 module "vpc" {
-  source = "./modules/vpc"
-  region = var.aws_region
+  source       = "./modules/vpc"
+  region       = var.aws_region
+  cluster_name = local.cluster_name
 }
 
 resource "aws_route53_zone" "cluster_dns" {
@@ -21,13 +32,13 @@ module "databases" {
   for_each = toset(var.environments_internal_names)
 
   source                            = "./modules/databases"
-  identifier                        = "${module.vpc.cluster_name}-database-${each.key}"
+  identifier                        = "${local.cluster_name}-database-${each.key}"
   subnets                           = module.vpc.vpc_private_subnets
   cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
 }
 
 resource "aws_iam_policy" "environment-policy" {
-  name        = "${module.vpc.cluster_name}-env-policy"
+  name        = "${local.cluster_name}-env-policy"
   description = "Environment Template Policy"
 
   policy = templatefile("./templates/iam_environment_policy.tftpl", {
@@ -39,7 +50,7 @@ resource "aws_iam_policy" "environment-policy" {
 }
 
 resource "aws_iam_policy" "provisioner-policy" {
-  name        = "${module.vpc.cluster_name}-provisioner-policy"
+  name        = "${local.cluster_name}-provisioner-policy"
   description = "Storage Provisioner admin Policy"
 
   policy = templatefile("./templates/iam_provisioner_policy.tftpl", {
@@ -53,7 +64,7 @@ resource "aws_iam_policy" "provisioner-policy" {
 }
 
 resource "aws_iam_role" "storage-provisioner-role" {
-  name        = "${module.vpc.cluster_name}-storage-provisioner-irsa"
+  name        = "${local.cluster_name}-storage-provisioner-irsa"
   description = "Storage Provisioner admin Policy"
 
   assume_role_policy = jsonencode({
@@ -82,7 +93,7 @@ data "aws_caller_identity" "current" {}
 
 module "container_registry" {
   source                   = "./modules/container-registry"
-  registry_repository_name = "${module.vpc.cluster_name}-ecr"
+  registry_repository_name = "${local.cluster_name}-ecr"
   region                   = var.aws_region
   account_id               = data.aws_caller_identity.current.account_id
   oidc_provider            = module.eks_blueprints.oidc_provider
@@ -117,7 +128,7 @@ module "eks_blueprints" {
   }
 
   # EKS CLUSTER
-  cluster_name       = module.vpc.cluster_name
+  cluster_name       = local.cluster_name
   cluster_version    = "1.24"
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.vpc_private_subnets
@@ -194,7 +205,7 @@ module "monitoring" {
   source        = "./modules/monitoring"
   aws_region    = var.aws_region
   account_id    = data.aws_caller_identity.current.account_id
-  cluster_name  = module.vpc.cluster_name
+  cluster_name  = local.cluster_name
   oidc_provider = module.eks_blueprints.oidc_provider
   domain_name   = var.domain_name
 
@@ -214,10 +225,10 @@ resource "helm_release" "mendix_installer" {
   values = [
     templatefile("${path.module}/helm-values/mendix-installer-values.yaml.tpl",
       {
-        cluster_name                       = module.vpc.cluster_name,
+        cluster_name                       = local.cluster_name,
         account_id                         = data.aws_caller_identity.current.account_id,
-        cluster_id                         = var.cluster_id,
-        cluster_secret                     = sensitive(var.cluster_secret),
+        namespace_id                       = var.namespace_id,
+        namespace_secret                   = sensitive(var.namespace_secret),
         mendix_operator_version            = var.mendix_operator_version,
         aws_region                         = module.vpc.region,
         certificate_expiration_email       = var.certificate_expiration_email

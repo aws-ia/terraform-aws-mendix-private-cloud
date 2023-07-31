@@ -84,11 +84,10 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
     domain_name                  = "project-name-example.com"
     certificate_expiration_email = "example@example.com"
     s3_bucket_name               = "project-name"
-    cluster_id                   = ""
-    cluster_secret               = ""
+    namespace_id                 = ""
+    namespace_secret             = ""
     environments_internal_names  = ["app1", "app2", "app3"]
     ```
-**Important: Do not reuse the same S3 bucket created in Step 1 for the `s3_bucket_name` field. Terraform will create a new bucket with given name.**
 
 The number of applications deployed is handled by the `environments_internal_names` variable. Internal names are used during the environment creation, as shown here:
 
@@ -246,6 +245,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.35 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.7.1 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.16.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.4.3 |
 
 ## Modules
 
@@ -270,6 +270,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | [aws_route53_zone.cluster_dns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [helm_release.mendix_installer](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace.mendix](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [random_string.random-eks-suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_eks_cluster_auth.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster_auth) | data source |
 
@@ -279,11 +280,12 @@ After you deploy this Partner Solution, confirm that your resources and services
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS Region name | `string` | n/a | yes |
 | <a name="input_certificate_expiration_email"></a> [certificate\_expiration\_email](#input\_certificate\_expiration\_email) | Let's Encrypt certificate expiration email | `string` | n/a | yes |
-| <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | Mendix Private Cloud Cluster ID | `string` | n/a | yes |
-| <a name="input_cluster_secret"></a> [cluster\_secret](#input\_cluster\_secret) | Mendix Private Cloud Cluster Secret | `string` | n/a | yes |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name | `string` | n/a | yes |
+| <a name="input_namespace_id"></a> [namespace\_id](#input\_namespace\_id) | Mendix Private Cloud Namespace ID | `string` | n/a | yes |
+| <a name="input_namespace_secret"></a> [namespace\_secret](#input\_namespace\_secret) | Mendix Private Cloud Namespace Secret | `string` | n/a | yes |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | S3 bucket name | `string` | n/a | yes |
 | <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_eks_cluster_name_prefix"></a> [eks\_cluster\_name\_prefix](#input\_eks\_cluster\_name\_prefix) | EKS name prefix for the new cluster | `string` | `"mendix-eks"` | no |
 | <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
 | <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1"<br>]</pre> | no |
 | <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.12.0"` | no |

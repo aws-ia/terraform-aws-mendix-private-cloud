@@ -13,9 +13,14 @@ variable "s3_bucket_name" {
   description = "S3 bucket name"
 }
 
-variable "cluster_id" {
+variable "namespace_id" {
   type        = string
-  description = "Mendix Private Cloud Cluster ID"
+  description = "Mendix Private Cloud Namespace ID"
+}
+
+variable "namespace_secret" {
+  type        = string
+  description = "Mendix Private Cloud Namespace Secret"
 }
 
 variable "eks_node_instance_type" {
@@ -24,9 +29,15 @@ variable "eks_node_instance_type" {
   default     = "t3.medium"
 }
 
-variable "cluster_secret" {
+variable "eks_cluster_name_prefix" {
   type        = string
-  description = "Mendix Private Cloud Cluster Secret"
+  description = "EKS name prefix for the new cluster"
+  default     = "mendix-eks"
+
+  validation {
+    condition     = length(var.eks_cluster_name_prefix) < 65 && can(regex("^[0-9A-Za-z][A-Za-z0-9\\-_]*", var.eks_cluster_name_prefix))
+    error_message = "EKS name prefix max length is 65 and it should have the next patter: ^[0-9A-Za-z][A-Za-z0-9\\-_]*"
+  }
 }
 
 variable "mendix_operator_version" {
