@@ -18,3 +18,8 @@ variable "rds_instance_class" {
   default     = "db.t3.small"
   type        = string
 }
+
+variable "postgres_version" {
+  type        = string
+  description = "The version of Postgres that terraform would create."
+}

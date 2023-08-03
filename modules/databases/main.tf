@@ -22,6 +22,7 @@ resource "aws_db_instance" "default" {
   identifier                          = var.identifier
   db_name                             = "postgres"
   engine                              = local.database_engine
+  engine_version                      = var.postgres_version
   instance_class                      = var.rds_instance_class
   port                                = local.database_port
   username                            = local.database_username

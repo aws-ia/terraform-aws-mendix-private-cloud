@@ -34,6 +34,7 @@ module "databases" {
   source                            = "./modules/databases"
   identifier                        = "${local.cluster_name}-database-${each.key}"
   subnets                           = module.vpc.vpc_private_subnets
+  postgres_version                  = var.postgres_version
   cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
 }
 

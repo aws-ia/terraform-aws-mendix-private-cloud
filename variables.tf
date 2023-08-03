@@ -67,3 +67,9 @@ variable "environments_internal_names" {
     error_message = "Use only lowercase letters and numbers, with a maximum of 8 characters and a minimum of 1 character."
   }
 }
+
+variable "postgres_version" {
+  type        = string
+  description = "The version of Postgres that terraform would create."
+  default     = "14.8"
+}
