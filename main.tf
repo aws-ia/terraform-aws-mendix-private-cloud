@@ -1,8 +1,8 @@
 locals {
-  cluster_name = "${var.eks_cluster_name_prefix}-${random_string.random-eks-suffix.result}"
+  cluster_name = "${var.eks_cluster_name_prefix}-${random_string.random_eks_suffix.result}"
 }
 
-resource "random_string" "random-eks-suffix" {
+resource "random_string" "random_eks_suffix" {
   length    = 3
   min_lower = 3
   special   = false
@@ -38,7 +38,7 @@ module "databases" {
   cluster_primary_security_group_id = module.eks_blueprints.cluster_primary_security_group_id
 }
 
-resource "aws_iam_policy" "environment-policy" {
+resource "aws_iam_policy" "environment_policy" {
   name        = "${local.cluster_name}-env-policy"
   description = "Environment Template Policy"
 
@@ -50,7 +50,7 @@ resource "aws_iam_policy" "environment-policy" {
   })
 }
 
-resource "aws_iam_policy" "provisioner-policy" {
+resource "aws_iam_policy" "provisioner_policy" {
   name        = "${local.cluster_name}-provisioner-policy"
   description = "Storage Provisioner admin Policy"
 
@@ -60,11 +60,11 @@ resource "aws_iam_policy" "provisioner-policy" {
     db_instance_resource_ids       = [for value in values(module.databases) : tostring(value.database_resource_id[0])]
     db_instance_usernames          = [for value in values(module.databases) : tostring(value.database_username[0])]
     filestorage_shared_bucket_name = var.s3_bucket_name
-    environment_policy_arn         = aws_iam_policy.environment-policy.arn
+    environment_policy_arn         = aws_iam_policy.environment_policy.arn
   })
 }
 
-resource "aws_iam_role" "storage-provisioner-role" {
+resource "aws_iam_role" "storage_provisioner_role" {
   name        = "${local.cluster_name}-storage-provisioner-irsa"
   description = "Storage Provisioner admin Policy"
 
@@ -87,7 +87,7 @@ resource "aws_iam_role" "storage-provisioner-role" {
     ]
   })
 
-  managed_policy_arns = [aws_iam_policy.provisioner-policy.arn]
+  managed_policy_arns = [aws_iam_policy.provisioner_policy.arn]
 }
 
 data "aws_caller_identity" "current" {}
@@ -234,8 +234,8 @@ resource "helm_release" "mendix_installer" {
         aws_region                         = module.vpc.region,
         certificate_expiration_email       = var.certificate_expiration_email
         s3_bucket_name                     = var.s3_bucket_name
-        environment_iam_template_policy    = aws_iam_policy.environment-policy.arn
-        storage_provisioner_iam_admin_role = aws_iam_role.storage-provisioner-role.arn
+        environment_iam_template_policy    = aws_iam_policy.environment_policy.arn
+        storage_provisioner_iam_admin_role = aws_iam_role.storage_provisioner_role.arn
         oidc_url                           = "https://${module.eks_blueprints.oidc_provider}"
         database_server_addresses          = [for value in values(module.databases) : tostring(value.database_server_address[0])]
         database_ports                     = [for value in values(module.databases) : tostring(value.database_port[0])]
