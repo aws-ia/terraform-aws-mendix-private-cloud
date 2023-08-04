@@ -118,11 +118,7 @@ The internal name must match the name that you specify in the `environments_inte
 
 4. Depending on your provider, update **External Domain Name Registrar** or **Route53 registered domain** with the *aws\_route53\_zone\_name\_servers* values. For more information, refer to [Configuring Amazon Route 53 as your DNS service](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
 
-5. In the developer portal, choose **Cluster Manager**, then choose the **Customization** tab. Enable **External Secrets Store**.
-
-![Customization tab](https://raw.githubusercontent.com/aws-ia/terraform-aws-mendix-private-cloud/main/doc/deployment_guide/images/secrets-store.png)
-
-6. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
+5. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
 
 ## Security
 
@@ -207,6 +203,9 @@ In the Mendix Private Cloud portal, in the Cluster Manager, the status of your c
 
 ## Cleanup
 
+Before cleaning up, make sure that you have deleted Mendix App environments.
+Otherwise, you will need to manually remove some finalizers in the namespace and detach some roles from policies in AWS IAM.
+
 To clean up your environment, run the following commands:
 
 ```
@@ -231,7 +230,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.35 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.10 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.7.1 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.14 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.16.1 |
@@ -242,7 +241,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.35 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.10 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.7.1 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.16.1 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.4.3 |
@@ -253,8 +252,8 @@ After you deploy this Partner Solution, confirm that your resources and services
 |------|--------|---------|
 | <a name="module_container_registry"></a> [container\_registry](#module\_container\_registry) | ./modules/container-registry | n/a |
 | <a name="module_databases"></a> [databases](#module\_databases) | ./modules/databases | n/a |
-| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | github.com/aws-ia/terraform-aws-eks-blueprints | v4.28.0 |
-| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.28.0 |
+| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | github.com/aws-ia/terraform-aws-eks-blueprints | v4.32.1 |
+| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.32.1 |
 | <a name="module_file_storage"></a> [file\_storage](#module\_file\_storage) | ./modules/file-storage | n/a |
 | <a name="module_monitoring"></a> [monitoring](#module\_monitoring) | ./modules/monitoring | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ./modules/vpc | n/a |
@@ -289,6 +288,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
 | <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1"<br>]</pre> | no |
 | <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.12.0"` | no |
+| <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | The version of Postgres that terraform would create. | `string` | `"14.8"` | no |
 
 ## Outputs
 
