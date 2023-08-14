@@ -1,5 +1,5 @@
 variable "identifier" {
-  description = "VPC identifierD"
+  description = "VPC identifier"
   type        = string
 }
 
@@ -19,37 +19,7 @@ variable "rds_instance_class" {
   type        = string
 }
 
-variable "file_storage_endpoint" {
-  description = "S3 Regional endpoint"
+variable "postgres_version" {
   type        = string
-}
-
-variable "secrets_manager_name" {
-  type        = string
-  description = "Secrets Manager name"
-}
-
-variable "cluster_name" {
-  type        = string
-  description = "Kubernetes cluster name"
-}
-
-variable "aws_caller_identity_account_id" {
-  type        = string
-  description = "AWS Caller Identity Account ID"
-}
-
-variable "oidc_provider" {
-  type        = string
-  description = "The OpenID Connect identity provider (issuer URL without leading `https://`)"
-}
-
-variable "environment_internal_name" {
-  type        = string
-  description = "Environment internal name"
-}
-
-variable "filestorage_shared_bucket_arn" {
-  type        = string
-  description = "S3 shared bucket ARN"
+  description = "The version of Postgres that terraform would create."
 }

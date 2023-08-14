@@ -8,7 +8,7 @@ output "region" {
 # Kubernetes cluster
 output "cluster_name" {
   description = "Kubernetes cluster name"
-  value       = module.vpc.cluster_name
+  value       = local.cluster_name
 }
 
 output "vpc_private_subnets" {

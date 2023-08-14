@@ -5,8 +5,8 @@ module "mendix_private_cloud_example" {
   domain_name                  = var.domain_name
   certificate_expiration_email = var.certificate_expiration_email
   s3_bucket_name               = var.s3_bucket_name
-  cluster_id                   = var.cluster_id
-  cluster_secret               = var.cluster_secret
+  namespace_id                 = var.namespace_id
+  namespace_secret             = var.namespace_secret
   mendix_operator_version      = var.mendix_operator_version
 }
 

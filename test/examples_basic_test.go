@@ -26,8 +26,8 @@ func TestExamplesBasicTest(t *testing.T) {
 			"domain_name":                  uniqueId + "domain.com",
 			"certificate_expiration_email": uniqueId + "@test.com",
 			"s3_bucket_name":               uniqueId + "-s3-bucket",
-			"cluster_id":                   uniqueId + "-7824-4e08-97fd-9b5d1792a027",
-			"cluster_secret":               uniqueId + "UdfdTK7P0FD5",
+			"namespace_id":                 uniqueId + "-7824-4e08-97fd-9b5d1792a027",
+			"namespace_secret":             uniqueId + "UdfdTK7P0FD5",
 			"mendix_operator_version":      "2.10.0",
 		},
 		BackendConfig: map[string]interface{}{
@@ -56,8 +56,8 @@ func TestExamplesBasicTest(t *testing.T) {
 						"domain_name":                  uniqueId + "domain.com",
 						"certificate_expiration_email": uniqueId + "@test.com",
 						"s3_bucket_name":               uniqueId + "-s3-bucket",
-						"cluster_id":                   uniqueId + "-7824-4e08-97fd-9b5d1792a027",
-						"cluster_secret":               uniqueId + "UdfdTK7P0FD5",
+						"namespace_id":                 uniqueId + "-7824-4e08-97fd-9b5d1792a027",
+						"namespace_secret":             uniqueId + "UdfdTK7P0FD5",
 						"mendix_operator_version":      "2.10.0",
 					},
 					BackendConfig: map[string]interface{}{
