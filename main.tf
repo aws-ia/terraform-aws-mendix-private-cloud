@@ -107,7 +107,7 @@ resource "aws_ebs_encryption_by_default" "ebs_encryption" {
 }
 
 module "eks_blueprints" {
-  source = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.13"
 
   # EKS CLUSTER
@@ -152,8 +152,8 @@ module "eks_blueprints_kubernetes_addons" {
 
   # EKS Managed Add-ons
   eks_addons = {
-    coredns            = {}
-    kube-proxy         = {}
+    coredns    = {}
+    kube-proxy = {}
     aws-ebs-csi-driver = {
       service_account_role_arn = module.ebs_csi_driver_irsa.iam_role_arn
     }
@@ -161,33 +161,33 @@ module "eks_blueprints_kubernetes_addons" {
 
   # Add-ons
   enable_aws_load_balancer_controller = true
-  aws_load_balancer_controller        = {
+  aws_load_balancer_controller = {
     chart_version = "1.6.1"
-    set           = [{
+    set = [{
       name  = "enableServiceMutatorWebhook"
       value = "false"
     }]
   }
 
-  enable_external_dns            = true
+  enable_external_dns = true
   external_dns_route53_zone_arns = [
     aws_route53_zone.cluster_dns.arn
   ]
-  external_dns                   = {
+  external_dns = {
     values = [templatefile("${path.module}/helm-values/external-dns-values.yaml", {
       hostname = var.domain_name
     })]
   }
 
   enable_ingress_nginx = true
-  ingress_nginx        = {
+  ingress_nginx = {
     values = [templatefile("${path.module}/helm-values/nginx-values.yaml", {
       hostname = var.domain_name
     })]
   }
 
   enable_cert_manager = true
-  cert_manager        = {
+  cert_manager = {
     set_values = [
       {
         name  = "extraArgs[0]"
@@ -197,9 +197,9 @@ module "eks_blueprints_kubernetes_addons" {
   }
 
   enable_kube_prometheus_stack = true
-  kube_prometheus_stack        = {
+  kube_prometheus_stack = {
     namespace = "prometheus"
-    values = [templatefile("${path.module}/helm-values/prometheus-values.yaml", {})]
+    values    = [templatefile("${path.module}/helm-values/prometheus-values.yaml", {})]
   }
 
   depends_on = [module.eks_blueprints, aws_route53_zone.cluster_dns]
