@@ -84,8 +84,8 @@ Before you can provision your Mendix environments on Amazon EKS, you must instal
     domain_name                  = "project-name-example.com"
     certificate_expiration_email = "example@example.com"
     s3_bucket_name               = "project-name"
-    cluster_id                   = ""
-    cluster_secret               = ""
+    namespace_id                 = ""
+    namespace_secret             = ""
     environments_internal_names  = ["app1", "app2", "app3"]
     ```
 
@@ -118,11 +118,7 @@ The internal name must match the name that you specify in the `environments_inte
 
 4. Depending on your provider, update **External Domain Name Registrar** or **Route53 registered domain** with the *aws\_route53\_zone\_name\_servers* values. For more information, refer to [Configuring Amazon Route 53 as your DNS service](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring.html).
 
-5. In the developer portal, choose **Cluster Manager**, then choose the **Customization** tab. Enable **External Secrets Store**.
-
-![Customization tab](https://raw.githubusercontent.com/aws-ia/terraform-aws-mendix-private-cloud/main/doc/deployment_guide/images/secrets-store.png)
-
-6. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
+5. If you're deploying more than three apps, change the default instance type of the `eks_node_instance_type` variable. By default, the instance type for the Kubernetes nodes is optimized to support up to three apps. Deploying more than three apps with the default instance type may affect the performance of your applications. For more information, refer to [Choosing an Amazon EC2 instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html) in the Amazon EKS User Guide.
 
 ## Security
 
@@ -145,7 +141,7 @@ scales up and down by allowing Kubernetes to modify the Amazon EC2 Auto Scaling 
 
 A basic logging and monitoring stack containing Prometheus, Grafana, Loki and Promtail is available at the following URL: `https://monitoring.{domain_name}`
 
-To retrieve the Grafana administrative credentials, run the following command:
+To retrieve the Grafana administrative credentials (with `admin` username), run the following command:
 
 ```
 terraform output -json grafana_admin_password
@@ -207,13 +203,15 @@ In the Mendix Private Cloud portal, in the Cluster Manager, the status of your c
 
 ## Cleanup
 
+Before cleaning up, make sure that you have deleted Mendix App environments.
+Otherwise, you will need to manually remove some finalizers in the namespace and detach some roles from policies in AWS IAM.
+
 To clean up your environment, run the following commands:
 
 ```
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].module.helm_addon.helm_release.addon[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx.helm_release.this[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.kube_prometheus_stack.helm_release.this[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.aws_load_balancer_controller.helm_release.this[0]" -auto-approve
 terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approve
 terraform destroy -auto-approve
 ```
@@ -231,7 +229,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.35 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.10 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | >= 2.7.1 |
 | <a name="requirement_kubectl"></a> [kubectl](#requirement\_kubectl) | >= 1.14 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | >= 2.16.1 |
@@ -242,9 +240,10 @@ After you deploy this Partner Solution, confirm that your resources and services
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.35 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.10 |
 | <a name="provider_helm"></a> [helm](#provider\_helm) | >= 2.7.1 |
 | <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.16.1 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.4.3 |
 
 ## Modules
 
@@ -252,8 +251,9 @@ After you deploy this Partner Solution, confirm that your resources and services
 |------|--------|---------|
 | <a name="module_container_registry"></a> [container\_registry](#module\_container\_registry) | ./modules/container-registry | n/a |
 | <a name="module_databases"></a> [databases](#module\_databases) | ./modules/databases | n/a |
-| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | github.com/aws-ia/terraform-aws-eks-blueprints | v4.28.0 |
-| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.28.0 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | ~> 5.20 |
+| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | terraform-aws-modules/eks/aws | ~> 19.13 |
+| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | aws-ia/eks-blueprints-addons/aws | ~> 1.8.0 |
 | <a name="module_file_storage"></a> [file\_storage](#module\_file\_storage) | ./modules/file-storage | n/a |
 | <a name="module_monitoring"></a> [monitoring](#module\_monitoring) | ./modules/monitoring | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ./modules/vpc | n/a |
@@ -263,9 +263,13 @@ After you deploy this Partner Solution, confirm that your resources and services
 | Name | Type |
 |------|------|
 | [aws_ebs_encryption_by_default.ebs_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ebs_encryption_by_default) | resource |
+| [aws_iam_policy.environment_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_policy.provisioner_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.storage_provisioner_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_route53_zone.cluster_dns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [helm_release.mendix_installer](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [kubernetes_namespace.mendix](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/namespace) | resource |
+| [random_string.random_eks_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_eks_cluster_auth.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eks_cluster_auth) | data source |
 
@@ -275,14 +279,16 @@ After you deploy this Partner Solution, confirm that your resources and services
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS Region name | `string` | n/a | yes |
 | <a name="input_certificate_expiration_email"></a> [certificate\_expiration\_email](#input\_certificate\_expiration\_email) | Let's Encrypt certificate expiration email | `string` | n/a | yes |
-| <a name="input_cluster_id"></a> [cluster\_id](#input\_cluster\_id) | Mendix Private Cloud Cluster ID | `string` | n/a | yes |
-| <a name="input_cluster_secret"></a> [cluster\_secret](#input\_cluster\_secret) | Mendix Private Cloud Cluster Secret | `string` | n/a | yes |
 | <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name) | Domain name | `string` | n/a | yes |
+| <a name="input_namespace_id"></a> [namespace\_id](#input\_namespace\_id) | Mendix Private Cloud Namespace ID | `string` | n/a | yes |
+| <a name="input_namespace_secret"></a> [namespace\_secret](#input\_namespace\_secret) | Mendix Private Cloud Namespace Secret | `string` | n/a | yes |
 | <a name="input_s3_bucket_name"></a> [s3\_bucket\_name](#input\_s3\_bucket\_name) | S3 bucket name | `string` | n/a | yes |
 | <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | List of IP adresses allowed to access EKS cluster endpoint | `list(string)` | <pre>[<br>  "0.0.0.0/0"<br>]</pre> | no |
+| <a name="input_eks_cluster_name_prefix"></a> [eks\_cluster\_name\_prefix](#input\_eks\_cluster\_name\_prefix) | EKS name prefix for the new cluster | `string` | `"mendix-eks"` | no |
 | <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
 | <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1"<br>]</pre> | no |
-| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.10.0"` | no |
+| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.13.0"` | no |
+| <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | The version of Postgres that terraform would create. | `string` | `"14.8"` | no |
 
 ## Outputs
 

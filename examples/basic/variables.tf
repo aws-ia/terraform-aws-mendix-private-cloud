@@ -13,14 +13,14 @@ variable "s3_bucket_name" {
   description = "S3 bucket name"
 }
 
-variable "cluster_id" {
+variable "namespace_id" {
   type        = string
-  description = "Mendix Private Cloud Cluster ID"
+  description = "Mendix Private Cloud Namespace ID"
 }
 
-variable "cluster_secret" {
+variable "namespace_secret" {
   type        = string
-  description = "Mendix Private Cloud Cluster Secret"
+  description = "Mendix Private Cloud Namespace Secret"
 }
 
 variable "mendix_operator_version" {
