@@ -42,7 +42,7 @@ resource "aws_iam_policy" "environment_policy" {
   name        = "${local.cluster_name}-env-policy"
   description = "Environment Template Policy"
 
-  policy = templatefile("./iam-templates/iam_environment_policy.json.tpl", {
+  policy = templatefile("${path.module}/iam-templates/iam_environment_policy.json.tpl", {
     aws_region                     = var.aws_region
     aws_account_id                 = data.aws_caller_identity.current.account_id
     db_instance_resource_ids       = [for value in values(module.databases) : tostring(value.database_resource_id[0])]
@@ -54,7 +54,7 @@ resource "aws_iam_policy" "provisioner_policy" {
   name        = "${local.cluster_name}-provisioner-policy"
   description = "Storage Provisioner admin Policy"
 
-  policy = templatefile("./iam-templates/iam_provisioner_policy.json.tpl", {
+  policy = templatefile("${path.module}/iam-templates/iam_provisioner_policy.json.tpl", {
     aws_region                     = var.aws_region
     aws_account_id                 = data.aws_caller_identity.current.account_id
     db_instance_resource_ids       = [for value in values(module.databases) : tostring(value.database_resource_id[0])]
