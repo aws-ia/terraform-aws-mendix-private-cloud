@@ -141,7 +141,7 @@ scales up and down by allowing Kubernetes to modify the Amazon EC2 Auto Scaling 
 
 A basic logging and monitoring stack containing Prometheus, Grafana, Loki and Promtail is available at the following URL: `https://monitoring.{domain_name}`
 
-To retrieve the Grafana administrative credentials, run the following command:
+To retrieve the Grafana administrative credentials (with `admin` username), run the following command:
 
 ```
 terraform output -json grafana_admin_password
@@ -209,10 +209,9 @@ Otherwise, you will need to manually remove some finalizers in the namespace and
 To clean up your environment, run the following commands:
 
 ```
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].module.helm_addon.helm_release.addon[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]" -auto-approve
-terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.ingress_nginx.helm_release.this[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.kube_prometheus_stack.helm_release.this[0]" -auto-approve
+terraform destroy -target="module.eks_blueprints_kubernetes_addons.module.aws_load_balancer_controller.helm_release.this[0]" -auto-approve
 terraform destroy -target="module.eks_blueprints_kubernetes_addons" -auto-approve
 terraform destroy -auto-approve
 ```
@@ -252,8 +251,9 @@ After you deploy this Partner Solution, confirm that your resources and services
 |------|--------|---------|
 | <a name="module_container_registry"></a> [container\_registry](#module\_container\_registry) | ./modules/container-registry | n/a |
 | <a name="module_databases"></a> [databases](#module\_databases) | ./modules/databases | n/a |
-| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | github.com/aws-ia/terraform-aws-eks-blueprints | v4.32.1 |
-| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons | v4.32.1 |
+| <a name="module_ebs_csi_driver_irsa"></a> [ebs\_csi\_driver\_irsa](#module\_ebs\_csi\_driver\_irsa) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | ~> 5.20 |
+| <a name="module_eks_blueprints"></a> [eks\_blueprints](#module\_eks\_blueprints) | terraform-aws-modules/eks/aws | ~> 19.13 |
+| <a name="module_eks_blueprints_kubernetes_addons"></a> [eks\_blueprints\_kubernetes\_addons](#module\_eks\_blueprints\_kubernetes\_addons) | aws-ia/eks-blueprints-addons/aws | ~> 1.8.0 |
 | <a name="module_file_storage"></a> [file\_storage](#module\_file\_storage) | ./modules/file-storage | n/a |
 | <a name="module_monitoring"></a> [monitoring](#module\_monitoring) | ./modules/monitoring | n/a |
 | <a name="module_vpc"></a> [vpc](#module\_vpc) | ./modules/vpc | n/a |
@@ -287,7 +287,7 @@ After you deploy this Partner Solution, confirm that your resources and services
 | <a name="input_eks_cluster_name_prefix"></a> [eks\_cluster\_name\_prefix](#input\_eks\_cluster\_name\_prefix) | EKS name prefix for the new cluster | `string` | `"mendix-eks"` | no |
 | <a name="input_eks_node_instance_type"></a> [eks\_node\_instance\_type](#input\_eks\_node\_instance\_type) | EKS instance type | `string` | `"t3.medium"` | no |
 | <a name="input_environments_internal_names"></a> [environments\_internal\_names](#input\_environments\_internal\_names) | List of internal environments names | `list(string)` | <pre>[<br>  "app1"<br>]</pre> | no |
-| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.12.0"` | no |
+| <a name="input_mendix_operator_version"></a> [mendix\_operator\_version](#input\_mendix\_operator\_version) | Mendix Private Cloud Operator version | `string` | `"2.13.0"` | no |
 | <a name="input_postgres_version"></a> [postgres\_version](#input\_postgres\_version) | The version of Postgres that terraform would create. | `string` | `"14.8"` | no |
 
 ## Outputs

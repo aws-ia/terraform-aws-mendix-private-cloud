@@ -8,8 +8,10 @@ import (
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
+	"log"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestExamplesBasicTest(t *testing.T) {
@@ -28,7 +30,7 @@ func TestExamplesBasicTest(t *testing.T) {
 			"s3_bucket_name":               uniqueId + "-s3-bucket",
 			"namespace_id":                 uniqueId + "-7824-4e08-97fd-9b5d1792a027",
 			"namespace_secret":             uniqueId + "UdfdTK7P0FD5",
-			"mendix_operator_version":      "2.10.0",
+			"mendix_operator_version":      "2.13.0",
 		},
 		BackendConfig: map[string]interface{}{
 			"backend": "local",
@@ -37,10 +39,9 @@ func TestExamplesBasicTest(t *testing.T) {
 
 	// Destroy order
 	modules := []string{
-		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].module.helm_addon.helm_release.addon[0]",
-		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx[0].kubernetes_namespace_v1.this[0]",
-		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].module.helm_addon.helm_release.addon[0]",
-		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.prometheus[0].kubernetes_namespace_v1.prometheus[0]",
+		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.ingress_nginx.helm_release.this[0]",
+		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.kube_prometheus_stack.helm_release.this[0]",
+		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons.module.aws_load_balancer_controller.helm_release.this[0]",
 		"module.mendix_private_cloud_example.module.eks_blueprints_kubernetes_addons",
 		"destroy",
 	}
@@ -49,6 +50,7 @@ func TestExamplesBasicTest(t *testing.T) {
 		for _, target := range modules {
 			clusterName := terraform.Output(t, terraformOptions, "cluster_name")
 			if target != "destroy" {
+				fmt.Println("Destroying " + target + "...")
 				terraformOptions := &terraform.Options{
 					TerraformDir: tempTestFolder,
 					Vars: map[string]interface{}{
@@ -58,7 +60,7 @@ func TestExamplesBasicTest(t *testing.T) {
 						"s3_bucket_name":               uniqueId + "-s3-bucket",
 						"namespace_id":                 uniqueId + "-7824-4e08-97fd-9b5d1792a027",
 						"namespace_secret":             uniqueId + "UdfdTK7P0FD5",
-						"mendix_operator_version":      "2.10.0",
+						"mendix_operator_version":      "2.13.0",
 					},
 					BackendConfig: map[string]interface{}{
 						"backend": "local",
@@ -88,4 +90,6 @@ func TestExamplesBasicTest(t *testing.T) {
 	})
 
 	terraform.InitAndApply(t, terraformOptions)
+	log.Println("Waiting for 20s before starting to delete everything")
+	time.Sleep(time.Second * 20)
 }
