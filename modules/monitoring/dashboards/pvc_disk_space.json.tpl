@@ -127,7 +127,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "kubelet_volume_stats_used_bytes{namespace=\"prometheus\",persistentvolumeclaim=\"prometheus-server\"}",
+          "expr": "kubelet_volume_stats_used_bytes{namespace=\"prometheus\",persistentvolumeclaim=\"prometheus-server-prometheus-kube-prometheus-stack-prometheus-0\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -138,7 +138,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "disk space used (PVC \"prometheus-server\")",
+      "title": "disk space used (PVC \"prometheus-server-prometheus-kube-prometheus-stack-prometheus-0\")",
       "tooltip": {
         "shared": true,
         "sort": 0,
