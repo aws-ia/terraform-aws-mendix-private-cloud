@@ -22,3 +22,13 @@ variable "domain_name" {
   type        = string
   description = "Domain name"
 }
+
+variable "cloudwatch_log_group_name" {
+  type        = string
+  description = "CloudWatch log group name"
+}
+
+variable "cloudwatch_log_group_arn" {
+  type        = string
+  description = "CloudWatch log group ARN"
+}

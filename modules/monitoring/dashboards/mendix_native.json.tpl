@@ -1466,6 +1466,10 @@
       "type": "row"
     },
     {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "cloudwatch"
+      },
       "gridPos": {
         "h": 13,
         "w": 24,
@@ -1487,13 +1491,21 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "Loki"
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
           },
-          "expr": "{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}",
+          "expression": "fields @timestamp, @message |\n filter kubernetes.namespace_name = '$namespace' and kubernetes.pod_name = '$pod_name' |\n sort @timestamp desc",
+          "logGroups": [
+            {
+              "accountId": "${awsAccountId}",
+              "arn": "${awsLogGroupARN}:*",
+              "name": "${awsLogGroupName}"
+            }
+          ],
           "hide": false,
           "instant": false,
-          "queryType": "randomWalk",
+          "queryMode": "Logs",
+          "region": "default",
           "range": true,
           "refId": "Mendix Runtime logs"
         }
