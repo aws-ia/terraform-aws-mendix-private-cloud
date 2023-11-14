@@ -42,10 +42,6 @@ datasources:
      type: prometheus
      isDefault: true
      url: ${prometheus_endpoint}
-   - name: Loki
-     type: loki
-     url: http://loki-stack.loki.svc.cluster.local:3100
-     access: proxy
    - name: CloudWatch
      type: cloudwatch
      access: proxy
