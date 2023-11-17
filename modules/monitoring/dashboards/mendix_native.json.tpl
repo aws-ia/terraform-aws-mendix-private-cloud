@@ -167,7 +167,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name!=\"\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name!=\"\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "{{name}}",
@@ -179,7 +179,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name=\"\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name=\"\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "/",
@@ -380,7 +380,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_inserts_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_inserts_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "interval": "",
           "legendFormat": "inserts",
           "queryType": "randomWalk",
@@ -392,7 +392,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_transactions_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_transactions_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "transactions",
@@ -405,7 +405,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_updates_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_updates_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "updates",
@@ -418,7 +418,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_selects_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_selects_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "selects",
@@ -431,7 +431,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_deletes_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_deletes_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "deletes",
@@ -532,7 +532,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}[5m])",
+          "expr": "rate(sum without (id, name) (container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"})[5m:])",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -883,7 +883,7 @@
         },
         {
           "exemplar": true,
-          "expr": "container_memory_usage_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}",
+          "expr": "max without (id, name) (container_memory_usage_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}) ",
           "hide": false,
           "interval": "",
           "legendFormat": "used memory",
@@ -967,7 +967,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "container_threads{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}\r",
+          "expr": "max without (id, name) (container_threads{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"})\r",
           "hide": false,
           "instant": false,
           "interval": "",
