@@ -830,7 +830,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id!=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id!~\"G1 Eden Space|Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -838,17 +838,6 @@
           "legendFormat": "{{id}}",
           "queryType": "randomWalk",
           "refId": "JVM memory pool (except eden space)"
-        },
-        {
-          "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id=\"Eden Space\"}",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{id}}",
-          "queryType": "randomWalk",
-          "refId": "JVM memory pool (eden space)"
         },
         {
           "exemplar": true,
@@ -880,6 +869,17 @@
           "interval": "",
           "legendFormat": "max memory",
           "refId": "Memory limit"
+        },
+        {
+          "exemplar": true,
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id=~\"G1 Eden Space|Eden Space\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Eden Space",
+          "queryType": "randomWalk",
+          "refId": "JVM memory pool (eden space)"
         },
         {
           "exemplar": true,
@@ -1414,7 +1414,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id!=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id!~\"G1 Eden Space|Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1425,10 +1425,10 @@
         },
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id=~\"G1 Eden Space|Eden Space\"}",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{id}}",
+          "legendFormat": "Eden Space",
           "refId": "Eden space"
         },
         {
