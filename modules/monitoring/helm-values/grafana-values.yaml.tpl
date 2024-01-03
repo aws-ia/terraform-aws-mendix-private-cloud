@@ -1,4 +1,6 @@
 grafana.ini:
+  auth:
+    sigv4_auth_enabled: true
   server:
     domain: monitoring.${hostname}
     root_url: "%(protocol)s://%(domain)s/grafana"
@@ -33,13 +35,13 @@ datasources:
    datasources:
    - name: Prometheus
      type: prometheus
-     url: http://kube-prometheus-stack-prometheus.prometheus.svc.cluster.local:9090
-     access: proxy
+     jsonData:
+       sigV4Auth: true
+       sigV4Region: ${aws_region}
+       sigV4AuthType: default
+     type: prometheus
      isDefault: true
-   - name: Loki
-     type: loki
-     url: http://loki-stack.loki.svc.cluster.local:3100
-     access: proxy
+     url: ${prometheus_endpoint}
    - name: CloudWatch
      type: cloudwatch
      access: proxy
