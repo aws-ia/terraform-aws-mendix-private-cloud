@@ -28,11 +28,11 @@ As shown in the diagram, this solution sets up the following:
 * In the private subnets, Amazon EKS clusters—each with three Kubernetes nodes—inside an Auto Scaling group. Each node is an Amazon Elastic Compute Cloud (Amazon EC2) instance. Each cluster contains the following (not shown):
     * Mendix apps and components.
     * Cert-manager.
-    * An open-source logging and monitoring solution with Grafana, Prometheus, Loki, and Promtail.
+    * An open-source logging and monitoring solution with Grafana, AWS managed Prometheus, OpenTelemetry, CloudWatch, and Fluent Bit.
     * ExternalDNS, which synchronizes exposed Kubernetes services and ingresses with Route 53.
 * A Network Load Balancer to distribute traffic across the Kubernetes nodes.
 * Amazon Simple Storage Service (Amazon S3) to store the files.
-* Amazon Elastic Block Store (Amazon EBS) to provide storage for Grafana, Prometheus, and Loki.
+* Amazon Elastic Block Store (Amazon EBS) to provide storage for Grafana.
 * Amazon Relational Database Service (Amazon RDS) for PostgreSQL to store Mendix application data.
 * Amazon Elastic Container Registry (Amazon ECR) to provide a private registry.
 * AWS Key Management Service (AWS KMS) to provide an encryption key for Amazon RDS, Amazon EBS, and AWS Secrets Manager.
@@ -139,7 +139,7 @@ scales up and down by allowing Kubernetes to modify the Amazon EC2 Auto Scaling 
 
 ## Logging and monitoring
 
-A basic logging and monitoring stack containing Prometheus, Grafana, Loki and Promtail is available at the following URL: `https://monitoring.{domain_name}`
+A basic logging and monitoring stack containing Grafana, AWS managed Prometheus, OpenTelemetry, CloudWatch, and Fluent Bit is available at the following URL: `https://monitoring.{domain_name}`
 
 To retrieve the Grafana administrative credentials (with `admin` username), run the following command:
 
@@ -262,7 +262,9 @@ After you deploy this Partner Solution, confirm that your resources and services
 
 | Name | Type |
 |------|------|
+| [aws_cloudwatch_log_group.aws_for_fluentbit](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ebs_encryption_by_default.ebs_encryption](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ebs_encryption_by_default) | resource |
+| [aws_eks_addon.adot_addon](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_addon) | resource |
 | [aws_iam_policy.environment_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.provisioner_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_role.storage_provisioner_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |

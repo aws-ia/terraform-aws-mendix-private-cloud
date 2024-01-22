@@ -167,7 +167,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name!=\"\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name!=\"\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "{{name}}",
@@ -179,7 +179,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name=\"\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_handler_requests_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",name=\"\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "/",
@@ -380,7 +380,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_inserts_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_inserts_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "interval": "",
           "legendFormat": "inserts",
           "queryType": "randomWalk",
@@ -392,7 +392,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_transactions_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_transactions_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "transactions",
@@ -405,7 +405,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_updates_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_updates_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "updates",
@@ -418,7 +418,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_selects_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_selects_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "selects",
@@ -431,7 +431,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "irate(mx_runtime_stats_connectionbus_deletes_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"}[5m:])",
+          "expr": "irate(sum without (XASId) (mx_runtime_stats_connectionbus_deletes_total{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\"})[5m:])",
           "hide": false,
           "interval": "",
           "legendFormat": "deletes",
@@ -532,7 +532,7 @@
             "uid": "Prometheus"
           },
           "exemplar": true,
-          "expr": "rate(container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}[5m])",
+          "expr": "rate(sum without (id, name) (container_cpu_usage_seconds_total{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"})[5m:])",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -830,7 +830,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id!=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id!~\"G1 Eden Space|Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -838,17 +838,6 @@
           "legendFormat": "{{id}}",
           "queryType": "randomWalk",
           "refId": "JVM memory pool (except eden space)"
-        },
-        {
-          "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id=\"Eden Space\"}",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{id}}",
-          "queryType": "randomWalk",
-          "refId": "JVM memory pool (eden space)"
         },
         {
           "exemplar": true,
@@ -883,7 +872,18 @@
         },
         {
           "exemplar": true,
-          "expr": "container_memory_usage_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",id=~\"G1 Eden Space|Eden Space\"}",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Eden Space",
+          "queryType": "randomWalk",
+          "refId": "JVM memory pool (eden space)"
+        },
+        {
+          "exemplar": true,
+          "expr": "max without (id, name) (container_memory_usage_bytes{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}) ",
           "hide": false,
           "interval": "",
           "legendFormat": "used memory",
@@ -967,7 +967,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "container_threads{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}\r",
+          "expr": "max without (id, name) (container_threads{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"})\r",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -1414,7 +1414,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id!=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id!~\"G1 Eden Space|Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -1425,10 +1425,10 @@
         },
         {
           "exemplar": true,
-          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id=\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{namespace=~\"$namespace\",privatecloud_mendix_com_app=\"$environment_id\",pod=~\"$pod_name\",area=\"heap\",id=~\"G1 Eden Space|Eden Space\"}",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{id}}",
+          "legendFormat": "Eden Space",
           "refId": "Eden space"
         },
         {
@@ -1466,6 +1466,10 @@
       "type": "row"
     },
     {
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "cloudwatch"
+      },
       "gridPos": {
         "h": 13,
         "w": 24,
@@ -1487,13 +1491,21 @@
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "Loki"
+            "type": "cloudwatch",
+            "uid": "cloudwatch"
           },
-          "expr": "{namespace=~\"$namespace\",pod=~\"$pod_name\",container=\"mendix\"}",
+          "expression": "fields @timestamp, @message |\n filter kubernetes.namespace_name = '$namespace' and kubernetes.pod_name = '$pod_name' |\n sort @timestamp desc",
+          "logGroups": [
+            {
+              "accountId": "${awsAccountId}",
+              "arn": "${awsLogGroupARN}:*",
+              "name": "${awsLogGroupName}"
+            }
+          ],
           "hide": false,
           "instant": false,
-          "queryType": "randomWalk",
+          "queryMode": "Logs",
+          "region": "default",
           "range": true,
           "refId": "Mendix Runtime logs"
         }

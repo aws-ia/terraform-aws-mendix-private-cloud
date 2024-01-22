@@ -196,13 +196,18 @@ module "eks_blueprints_kubernetes_addons" {
     ]
   }
 
-  enable_kube_prometheus_stack = true
-  kube_prometheus_stack = {
-    namespace = "prometheus"
-    values    = [templatefile("${path.module}/helm-values/prometheus-values.yaml", {})]
+  enable_aws_for_fluentbit = true
+  aws_for_fluentbit_cw_log_group = {
+    name = aws_cloudwatch_log_group.aws_for_fluentbit.name
   }
 
   depends_on = [module.eks_blueprints, aws_route53_zone.cluster_dns]
+}
+
+resource "aws_cloudwatch_log_group" "aws_for_fluentbit" {
+  name = "/aws/eks/${module.eks_blueprints.cluster_name}/aws-fluentbit-logs"
+
+  retention_in_days = 30
 }
 
 module "monitoring" {
@@ -212,6 +217,9 @@ module "monitoring" {
   cluster_name  = local.cluster_name
   oidc_provider = module.eks_blueprints.oidc_provider
   domain_name   = var.domain_name
+
+  cloudwatch_log_group_arn  = aws_cloudwatch_log_group.aws_for_fluentbit.arn
+  cloudwatch_log_group_name = aws_cloudwatch_log_group.aws_for_fluentbit.name
 
   depends_on = [module.eks_blueprints_kubernetes_addons]
 }
@@ -252,6 +260,14 @@ resource "helm_release" "mendix_installer" {
         environments_internal_names        = var.environments_internal_names
     })
   ]
+
+  depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
+}
+
+resource "aws_eks_addon" "adot_addon" {
+  cluster_name  = module.eks_blueprints.cluster_name
+  addon_name    = "adot"
+  addon_version = "v0.80.0-eksbuild.2"
 
   depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
 }
