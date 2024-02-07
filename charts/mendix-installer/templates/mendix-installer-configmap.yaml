@@ -9,7 +9,7 @@ data:
     
     wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
-    ./mxpc-cli base-install --namespace mendix -i {{ .Values.namespaceID }} -s {{ .Values.namespaceSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
+    ./mxpc-cli base-install --namespace mendix -i {{ .Values.namespaceID }} -s {{ .Values.namespaceSecret }} --clusterMode connected --clusterType generic
     
     wget --output-document=custom.crt https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
     kubectl -n mendix create secret generic mendix-custom-tls --from-file=custom.crt=custom.crt
