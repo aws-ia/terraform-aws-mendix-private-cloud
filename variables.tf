@@ -43,7 +43,7 @@ variable "eks_cluster_name_prefix" {
 variable "mendix_operator_version" {
   type        = string
   description = "Mendix Private Cloud Operator version"
-  default     = "2.13.0"
+  default     = "2.16.0"
 }
 
 variable "certificate_expiration_email" {
@@ -71,5 +71,12 @@ variable "environments_internal_names" {
 variable "postgres_version" {
   type        = string
   description = "The version of Postgres that terraform would create."
-  default     = "14.8"
+  default     = "14.11"
 }
+
+variable "eks_version" {
+  type        = string
+  description = "The version of EKS that terraform would create."
+  default     = "1.29"
+}
+
