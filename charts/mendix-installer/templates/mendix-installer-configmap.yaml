@@ -6,7 +6,16 @@ metadata:
 data:
   mxpc-cli-installer-script: | 
     #/bin/sh
-    
+
+    echo "Configuring kubeconfig for mxpc-cli..."
+    KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    KUBE_SERVER="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
+    kubectl config set-cluster default --server="${KUBE_SERVER}" --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    kubectl config set-credentials default --token="${KUBE_TOKEN}"
+    kubectl config set-context default --cluster=default --user=default
+    kubectl config use-context default
+    echo "Kubeconfig for mxpc-cli configured."
+
     wget https://cdn.mendix.com/mendix-for-private-cloud/mxpc-cli/mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     tar xvf mxpc-cli-{{ .Values.mendixOperatorVersion }}-linux-amd64.tar.gz
     ./mxpc-cli base-install --namespace mendix -i {{ .Values.namespaceID }} -s {{ .Values.namespaceSecret }} --clusterMode connected --clusterType generic --clusterTag="aws-reference-deployment"
