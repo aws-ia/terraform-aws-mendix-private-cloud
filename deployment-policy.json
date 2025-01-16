@@ -69,6 +69,7 @@
                 "logs:DeleteLogGroup",
                 "logs:DescribeLogGroups",
                 "logs:ListTagsLogGroup",
+                "logs:ListTagsForResource",
                 "logs:PutRetentionPolicy",
                 "logs:TagResource",
                 "aps:CreateWorkspace",

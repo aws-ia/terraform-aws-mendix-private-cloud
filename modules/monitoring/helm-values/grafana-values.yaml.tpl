@@ -9,6 +9,7 @@ persistence:
   type: pvc
   enabled: true
   size: 1Gi
+  storageClassName: gp2
 serviceAccount:
   create: true
   name: grafana

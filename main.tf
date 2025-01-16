@@ -267,7 +267,7 @@ resource "helm_release" "mendix_installer" {
 resource "aws_eks_addon" "adot_addon" {
   cluster_name  = module.eks_blueprints.cluster_name
   addon_name    = "adot"
-  addon_version = "v0.94.1-eksbuild.1"
+  addon_version = "v0.109.0-eksbuild.2"
 
   depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
 }
