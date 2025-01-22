@@ -26,7 +26,7 @@ variable "namespace_secret" {
 variable "mendix_operator_version" {
   type        = string
   description = "Mendix Private Cloud Operator version"
-  default     = "2.10.0"
+  default     = "2.16.0"
 }
 
 variable "certificate_expiration_email" {

@@ -108,11 +108,11 @@ resource "aws_ebs_encryption_by_default" "ebs_encryption" {
 
 module "eks_blueprints" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.13"
+  version = "~> 19.21"
 
   # EKS CLUSTER
   cluster_name    = local.cluster_name
-  cluster_version = "1.26"
+  cluster_version = var.eks_version
   vpc_id          = module.vpc.vpc_id
   subnet_ids      = module.vpc.vpc_private_subnets
 
@@ -221,7 +221,7 @@ module "monitoring" {
   cloudwatch_log_group_arn  = aws_cloudwatch_log_group.aws_for_fluentbit.arn
   cloudwatch_log_group_name = aws_cloudwatch_log_group.aws_for_fluentbit.name
 
-  depends_on = [module.eks_blueprints_kubernetes_addons]
+  depends_on = [module.eks_blueprints_kubernetes_addons, aws_eks_addon.adot_addon]
 }
 
 resource "kubernetes_namespace" "mendix" {
@@ -267,14 +267,14 @@ resource "helm_release" "mendix_installer" {
 resource "aws_eks_addon" "adot_addon" {
   cluster_name  = module.eks_blueprints.cluster_name
   addon_name    = "adot"
-  addon_version = "v0.80.0-eksbuild.2"
+  addon_version = "v0.94.1-eksbuild.1"
 
   depends_on = [module.eks_blueprints, module.eks_blueprints_kubernetes_addons]
 }
 
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.20"
+  version = "~> 5.39"
 
   role_name_prefix = "${module.eks_blueprints.cluster_name}-ebs-csi-driver-"
 
