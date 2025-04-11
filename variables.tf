@@ -79,10 +79,3 @@ variable "eks_version" {
   description = "The version of EKS that terraform would create."
   default     = "1.31"
 }
-
-variable "nginx_chart_version" {
-  type        = string
-  description = "The version of NGINX Helm chart to install."
-  default     = "4.12.1"
-}
-

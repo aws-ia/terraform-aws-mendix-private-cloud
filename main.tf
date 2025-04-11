@@ -143,7 +143,7 @@ module "eks_blueprints" {
 
 module "eks_blueprints_kubernetes_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.8.0"
+  version = ">= 1.21.0, < 2.0.0"
 
   cluster_name      = module.eks_blueprints.cluster_name
   cluster_endpoint  = module.eks_blueprints.cluster_endpoint
@@ -181,7 +181,6 @@ module "eks_blueprints_kubernetes_addons" {
 
   enable_ingress_nginx = true
   ingress_nginx = {
-    chart_version = var.nginx_chart_version
     values = [templatefile("${path.module}/helm-values/nginx-values.yaml", {
       hostname = var.domain_name
     })]
@@ -201,6 +200,8 @@ module "eks_blueprints_kubernetes_addons" {
   aws_for_fluentbit_cw_log_group = {
     name = aws_cloudwatch_log_group.aws_for_fluentbit.name
   }
+
+  observability_tag = null
 
   depends_on = [module.eks_blueprints, aws_route53_zone.cluster_dns]
 }
