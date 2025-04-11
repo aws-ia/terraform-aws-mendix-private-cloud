@@ -181,6 +181,7 @@ module "eks_blueprints_kubernetes_addons" {
 
   enable_ingress_nginx = true
   ingress_nginx = {
+    chart_version = var.nginx_chart_version
     values = [templatefile("${path.module}/helm-values/nginx-values.yaml", {
       hostname = var.domain_name
     })]
