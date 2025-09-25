@@ -79,4 +79,3 @@ variable "eks_version" {
   description = "The version of EKS that terraform would create."
   default     = "1.31"
 }
-
