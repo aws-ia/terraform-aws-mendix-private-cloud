@@ -21,7 +21,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.13, < 3.0.0"
+      version = ">= 3.0.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -41,7 +41,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.eks_blueprints.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks_blueprints.cluster_certificate_authority_data)
     token                  = data.aws_eks_cluster_auth.this.token
